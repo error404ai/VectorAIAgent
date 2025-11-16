@@ -1,194 +1,111 @@
-# WhiskeyBA - Browser Automation with Electron and BrowserUse
+# WhiskeyBA — Desktop Browser & Automation Agent
 
-WhiskeyBA is an Electron-based browser that can be controlled via the [BrowserUse](https://github.com/browser-use/browser-use) Python framework, allowing for both manual browsing and automated browser tasks.
+WhiskeyBA is a desktop browsing application that blends a full-featured web browser with a built-in automation assistant. It provides a practical environment to browse, automate tasks using natural language prompts, and manage multiple browser profiles and wallets — all in one self-contained desktop app.
 
-## Features
+---
 
-- Modern Electron-based web browser
-- Built-in AI prompt interface for automation commands
-- Support for external automation via BrowserUse Python framework
-- **Isolated webview that can be controlled without affecting the UI**
-- Dark/Light mode support
-- Organized Python automation modules for code reuse
-- Integrated browser opening capability
-- Tab management
-- Bookmark management with local storage
-- Command history and suggestions in AI interface
-- User preferences storage
-- Clean separation between automation control and browser UI (see [Architecture](docs/architecture.md))
+## What is WhiskeyBA? 💡
 
-## Using with BrowserUse
+WhiskeyBA is designed to make routine web tasks easier by combining a normal browsing experience with an automation-first interface. Users can manually browse, store bookmarks, and manage tabs — and switch to the assistant to instruct the application in natural language to run automation tasks. Automation tasks run in isolated browser profiles, keeping the UI and the automated content separate for safety and clarity.
 
-This browser exposes a Chrome DevTools Protocol (CDP) endpoint that allows external tools like BrowserUse to control it.
+---
 
-### Steps to use with BrowserUse:
+## Key Features ✨
 
-1. **Launch the WhiskeyBA browser**
+- Natural language automation: Use the built-in prompt panel to describe the task you want the browser to perform.
+- Profile-based automation: Create and manage multiple browser profiles with isolated browsing state (cookies, storage, history), then target specific profiles for automation tasks.
+- Automation task management: Start, stop, and monitor automation tasks with console-style logs and task result summaries.
+- Prompt history & saved prompts: Reuse previous prompts or save common prompts as templates for repeatable workflows.
+- Wallet manager: Create wallets, view balances, set the active wallet, and use wallets as part of automation tasks.
+- Profile management: Create, open, delete, and bulk-manage profiles to run tasks across different browser states.
+- Settings & preferences: Control startup behavior (default URL), UI theme, and selected profile behavior.
+- Local storage & privacy: User data and settings are stored locally and persist between sessions; the application is privacy-minded and offers options to limit telemetry and external sync.
+- Isolation & safety: Automation runs in isolated webviews so the main UI remains responsive and secure while automation is performed separately.
+- Scheduling & multi-profile workflows: Build workflows and schedule or orchestrate them across several profiles.
 
-   - The browser will start with remote debugging enabled on port 9222
-   - Find the debugging URL in the sidebar under "Automation" section
+---
 
-2. **Install BrowserUse in your Python environment**
+## Quick Start — Running the App ▶️
 
-   ```bash
-   pip install browser-use
-   ```
-
-3. **Use the provided example script**
-
-   - Open `example_browser_use.py` and update it with your task
-   - Make sure to set up your API keys in a `.env` file for the LLM provider you want to use
-
-4. **Run your Python script**
-   ```bash
-   python example_browser_use.py
-   ```
-
-### Example Python Code:
-
-```python
-import asyncio
-from dotenv import load_dotenv
-load_dotenv()
-
-from python.automation.browser_use import Agent, BrowserConfig, Browser
-from langchain_openai import ChatOpenAI
-
-async def main():
-    # Connect to the Electron browser instance
-    config = BrowserConfig(
-        cdp_url="http://localhost:9222"  # Use the URL from the sidebar
-    )
-
-    browser = Browser(config=config)
-
-    agent = Agent(
-        task="Your automation task here",
-        llm=ChatOpenAI(model="gpt-4o"),
-        browser=browser
-    )
-    await agent.run()
-
-if __name__ == "__main__":
-    asyncio.run(main())
-```
-
-## Using the AI Prompt Interface
-
-WhiskeyBA includes a built-in AI prompt interface that allows you to control the browser using natural language commands:
-
-1. **Access the AI Prompt Interface**
-
-   - Click the assistant icon in the bottom right corner of the browser window
-   - The AI prompt panel will open
-
-2. **Enter Your Commands**
-
-   - Type your request in natural language (e.g., "Search for Italian restaurants in New York")
-   - The AI will process your request and control the browser to complete the task
-
-3. **View Results**
-   - The AI will respond with updates as it works through your request
-   - The browser will be controlled automatically to fulfill your task
-
-The AI prompt interface is isolated from the browser automation control, ensuring that the AI can only control the browsing content but not the interface itself.
-
-## Development
-
-This project uses:
-
-- Electron for the browser framework
-- React for the UI
-- TypeScript for type safety
-- BrowserUse Python framework for browser automation
-
-To build and run:
+1. Install dependencies and start the development version:
 
 ```bash
-# Install dependencies
 npm install
-
-# Install Python dependencies
-pip install -r requirements.txt
-pip install -e .
-
-# Run in development mode
 npm run dev
-
-# Build for production
-npm run build
 ```
 
-## Storage Features
-
-WhiskeyBA includes several local storage features to enhance the user experience:
-
-### Bookmarks
-
-- Add bookmarks via the bookmark icon in the address bar
-- View and manage bookmarks in the bookmarks bar
-- Bookmarks are stored persistently using localStorage
-
-### AI Command History
-
-- Previous automation commands are saved in the AI interface
-- Access command history via the history button in the AI panel
-- Use suggested commands for common automation tasks
-
-### User Preferences
-
-The browser stores user preferences including:
-
-- Default search engine
-- Home page URL
-- UI theme settings
-- Bookmarks bar visibility
-- Tab behavior settings
-
-All settings are stored locally and persist between sessions.
-
-## Python Modules Organization
-
-WhiskeyBA includes a structured Python module organization for browser automation:
-
-### Python Components
-
-The project includes a unified Python application with a modular architecture:
-
-- **python/** - Main Python package directory
-  - **src/** - Source code organized by functionality
-    - **app.py** - Unified command dispatcher with CLI interface
-    - **automation/** - Browser automation modules
-    - **browser/** - Browser control modules
-    - **common/** - Shared configuration and utilities
-    - **utils/** - Utility functions and helpers
-  - **dist/** - Compiled executable (generated when built)
-  - `whiskey_app.py` - Main entry point for the unified application
-  - `build_all.py` - Script to compile the unified Python executable
-
-### Building Python Components
+2. To create a production build and package the application:
 
 ```bash
-# Build all Python components
-npm run build:python
-
-# Or from the python directory
-cd python
-python build_all.py
+npm run build
+# Depending on your platform you can run specific packaging scripts
+# e.g., "npm run dist:win" for a Windows build
 ```
 
-### Using in Your Scripts
+Note: When building a distributable, the project includes an optional companion step for a command-line automation runtime; this is invoked from the build script if desired.
 
-```python
-# Import directly from modules
-from python.src.automation.browser_automation import run_automation
-from python.src.browser.opener import open_browser
-```
+---
 
-## Contributing
+## How to Use — UI Overview 🧭
 
-If you're interested in contributing to WhiskeyBA, please see our [Contributing Guidelines](CONTRIBUTING.md) for more information on how to get started.
+- Address Bar & Tabs — Use the address bar to browse and manage tabs. Bookmarks and quick navigation let you keep favorite pages readily available.
+- Assistant Panel — Click the assistant icon to open the automation prompt. Enter a natural-language instruction (e.g., "Search for the best wireless headphones and add them to the comparison list") and run it against the selected profile.
+- Automation Console — The automation area shows per-profile logs, status indicators (running, ready), and task result messages; you can stop a running task at any time.
+- Prompt Sidebar — Access prompt history and saved prompts from the right-side panel. Selecting a prompt auto-fills the assistant, ready to run.
+- Wallet Management — Generate a new wallet, change the active wallet, refresh balances, copy public keys, and delete wallets. Wallets can be attached to automation tasks when needed.
+- Profile Management — Create, open, and delete browser profiles. Use different profiles to maintain separate cookies and session states for testing and automation.
+- Settings — Configure startup preferences, default site, and other UI-level options in the Settings panel.
 
-## Architecture
+---
 
-WhiskeyBA is designed with a clear separation between the browser UI and the web content that can be controlled by AI. The [Architecture Documentation](docs/architecture.md) provides a detailed explanation of how this isolation works.
+## Automation: Concepts & Workflow ⚙️
+
+- Profiles: Each automation task executes in an isolated profile to avoid shared state. Profiles let you run parallel workflows without interference.
+- Prompts: Automation tasks are initiated using plain text prompts. Prompts are recorded in history; frequently used prompts can be saved for quick reuse.
+- Task Execution: When you start an automation task, the app shows console-style logs and a final success/error summary. Tasks may optionally use attached wallets or read from a configured file upload directory for inputs.
+- Runtime Options: Options such as attaching wallets or designating an upload directory are configurable for a task at runtime.
+- External Integration: For advanced use, the app exposes runtime hooks and endpoints that let external processes or scripts interact with the browser (for example, to start a task, stream logs, or query status). These integrations are optional — the UI itself covers most use cases.
+
+---
+
+## Developer Guide & Building 🛠️
+
+1. Install dependencies: `npm install`.
+2. Development: `npm run dev` — launches the app locally in development mode.
+3. Build: `npm run build` — creates a production-ready bundle.
+4. Packaging: The repository includes platform build steps which produce distributable packages for OS targets.
+
+If you plan to contribute, follow these basic steps:
+
+1. Fork and create a feature branch.
+2. Add changes and tests where needed.
+3. Keep the UI design consistent with the project's existing visual style.
+4. Open a PR and reference any new behavior clearly in the description.
+
+Contributions are appreciated — check `CONTRIBUTING.md` for more details.
+
+---
+
+## Privacy & Security 🔒
+
+- Local-first: Preferences, prompts, profiles, and wallets are kept locally by default and persist between sessions.
+- Opt-in integrations: The app supports optional external automation clients or tooling; these are integrations you explicitly configure or enable.
+- Data storage: Wallet private information is stored securely and should be backed up by the user — never share private keys.
+
+---
+
+## Troubleshooting & Tips ⚠️
+
+- If automation tasks fail to start, confirm that a profile is selected, and that any runtime options (like wallet attachment or file directories) are configured.
+- When using an external automation client or script, double-check that the automation endpoint and debug port shown in the UI are reachable.
+- If a profile-based task is not behaving consistently, try running it in a fresh profile to isolate session-dependent state.
+
+---
+
+## Contributing & Support 🤝
+
+If you’d like to contribute, please read `CONTRIBUTING.md` and open a pull request with your proposed changes. For project documentation, architecture overview, and deeper implementation details, check the `docs/` directory if present.
+
+---
+
+Thank you for checking out WhiskeyBA — we hope this tool simplifies repeated browsing workflows and brings the power of automation to your desktop in a safe, easy-to-use package!
