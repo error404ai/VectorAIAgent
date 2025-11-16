@@ -1,12 +1,12 @@
-# WhiskeyBA — Desktop Browser & Automation Agent
+# Vector AI Agent — Desktop Browser & Automation Agent
 
-WhiskeyBA is a desktop browsing application that blends a full-featured web browser with a built-in automation assistant. It provides a practical environment to browse, automate tasks using natural language prompts, and manage multiple browser profiles and wallets — all in one self-contained desktop app.
+Vector AI Agent is a desktop browsing application that blends a full-featured web browser with a built-in automation assistant. It provides a practical environment to browse, automate tasks using natural language prompts, and manage multiple browser profiles and wallets — all in one self-contained desktop app.
 
 ---
 
-## What is WhiskeyBA? 💡
+## What is Vector AI Agent? 💡
 
-WhiskeyBA is designed to make routine web tasks easier by combining a normal browsing experience with an automation-first interface. Users can manually browse, store bookmarks, and manage tabs — and switch to the assistant to instruct the application in natural language to run automation tasks. Automation tasks run in isolated browser profiles, keeping the UI and the automated content separate for safety and clarity.
+Vector AI Agent is designed to make routine web tasks easier by combining a normal browsing experience with an automation-first interface. Users can manually browse, store bookmarks, and manage tabs — and switch to the assistant to instruct the application in natural language to run automation tasks. Automation tasks run in isolated browser profiles, keeping the UI and the automated content separate for safety and clarity.
 
 ---
 
@@ -108,4 +108,4 @@ If you’d like to contribute, please read `CONTRIBUTING.md` and open a pull req
 
 ---
 
-Thank you for checking out WhiskeyBA — we hope this tool simplifies repeated browsing workflows and brings the power of automation to your desktop in a safe, easy-to-use package!
+Thank you for checking out Vector AI Agent — we hope this tool simplifies repeated browsing workflows and brings the power of automation to your desktop in a safe, easy-to-use package!
