@@ -1,0 +1,23 @@
+(function() {
+  if (!window.solana) {
+    console.log({ ok: false, error: 'no provider' });
+    return;
+  }
+
+  window.solana.connect()
+    .then(() => {
+      const msg = new TextEncoder().encode('hello from test');
+      return window.solana.signMessage(msg);
+    })
+    .then((res) => {
+      const result = {
+        ok: true,
+        pubkey: window.solana.publicKey.toBase58(),
+        signature: res.signature
+      };
+      console.log(result);
+    })
+    .catch((e) => {
+      console.log({ ok: false, error: String(e) });
+    });
+})();

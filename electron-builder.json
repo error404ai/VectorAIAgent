@@ -1,0 +1,36 @@
+{
+  "appId": "com.vectorai.vectoraiagent",
+  "files": ["dist-electron", "dist-react"],
+  "icon": "./desktopIcon.png",
+  "extraResources": [
+    "dist-electron/preload.cjs",
+    {
+      "from": "python/dist",
+      "to": "automation",
+      "filter": ["**/*"]
+    },
+    {
+      "from": "src/electron/migrations",
+      "to": "migrations",
+      "filter": ["**/*"]
+    }
+  ],
+  "mac": {
+    "target": "dmg"
+  },
+  "linux": {
+    "target": "AppImage",
+    "category": "Utility"
+  },
+  "win": {
+    "target": ["nsis"]
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": true,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "Vector Ai Agent"
+  }
+}

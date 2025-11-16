@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+/* Custom Scrollbar Styles - Default for the application */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background-color: rgba(
+    9,
+    30,
+    56,
+    0.7
+  ); /* Dark blue background matching app theme */
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(11, 105, 198, 0.5); /* Blue accent color from the app */
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(11, 105, 198, 0.8); /* Brighter on hover */
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(9, 30, 56, 0.2);
+  border-radius: 4px;
+}
+
+/* Terminal/Console-like scrollbar for terminal output areas */
+.terminal-scrollbar::-webkit-scrollbar {
+  width: 6px; /* Slightly narrower for terminal areas */
+  height: 6px;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.terminal-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2); /* Lighter, more subtle thumb */
+  border-radius: 3px;
+}
+
+.terminal-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.terminal-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(11, 105, 198, 0.5) rgba(9, 30, 56, 0.2);
+}
+
+.terminal-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) rgba(0, 0, 0, 0.3);
+}
+
+/* Make scrolling smoother for a more desktop-like experience */
+.smooth-scroll {
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  scroll-behavior: smooth; /* Smooth scrolling on modern browsers */
+}
+
+/* Custom scrollbar for textareas and select dropdowns */
+textarea::-webkit-scrollbar,
+select::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+textarea::-webkit-scrollbar-thumb,
+select::-webkit-scrollbar-thumb {
+  background: rgba(11, 105, 198, 0.4);
+  border-radius: 3px;
+}
+
+textarea::-webkit-scrollbar-thumb:hover,
+select::-webkit-scrollbar-thumb:hover {
+  background: rgba(11, 105, 198, 0.6);
+}
+
+textarea::-webkit-scrollbar-track,
+select::-webkit-scrollbar-track {
+  background: rgba(9, 30, 56, 0.1);
+}
+
+/* Hide scrollbar but keep functionality (modern, clean look) */
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}

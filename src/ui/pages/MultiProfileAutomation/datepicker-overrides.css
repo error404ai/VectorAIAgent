@@ -1,0 +1,117 @@
+.react-datepicker-popper {
+  /* ensure the popup appears above modal content */
+  z-index: 9999 !important;
+  transform: translateY(20px) !important;
+}
+
+.react-datepicker__day:hover,
+.react-datepicker__month-text:hover,
+.react-datepicker__quarter-text:hover,
+.react-datepicker__year-text:hover .react-datepicker-time__header {
+  color: #fff;
+}
+
+.react-datepicker-time__header {
+  color: #fff;
+}
+
+.react-datepicker {
+  /* boxy design, no rounded corners per project rules */
+  border-radius: 0 !important;
+  background: #0b0b0b; /* dark background to match modal */
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: none !important;
+}
+
+.react-datepicker__header {
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.react-datepicker__current-month,
+.react-datepicker__day-name,
+.react-datepicker__day {
+  color: #e6eef8;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: #2563eb !important; /* blue */
+  color: white !important;
+  border-radius: 0 !important;
+}
+
+/* Time (right) panel styling - remove the white panel & scrollbar mismatch */
+.react-datepicker__time-container {
+  background: #0b0b0b !important;
+  color: #e6eef8 !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.04) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.react-datepicker__time {
+  background: transparent !important;
+  color: #e6eef8 !important;
+}
+
+.react-datepicker__time-box {
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.react-datepicker__time-list {
+  background: transparent !important;
+  color: #e6eef8 !important;
+  max-height: 220px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.react-datepicker__time-list-item {
+  padding: 6px 10px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02) !important;
+}
+
+.react-datepicker__time-list-item,
+.react-datepicker__time-list-item span {
+  color: #ffffff !important; /* ensure time text is white */
+}
+
+/* hover/active states for time items: use subtle dark highlight, not white */
+.react-datepicker__time-list-item:hover,
+.react-datepicker__time-list-item--selected,
+.react-datepicker__time-list-item--keyboard-selected {
+  background: rgba(255, 255, 255, 0.04) !important; /* subtle light on dark */
+  color: #ffffff !important;
+}
+
+/* focused/active state */
+.react-datepicker__time-list-item:focus {
+  outline: none !important;
+  background: rgba(37, 99, 235, 0.9) !important; /* primary blue for focus */
+  color: #ffffff !important;
+}
+
+/* dark scrollbar for the time list so the white track doesn't show */
+.react-datepicker__time-list::-webkit-scrollbar {
+  width: 10px;
+}
+.react-datepicker__time-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.react-datepicker__time-list::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+
+/* remove the little triangle arrow so the popup looks cleaner in modal */
+.react-datepicker__triangle {
+  display: none;
+}
+
+/* Ensure popper uses fixed positioning when inside modals */
+.react-datepicker-popper[data-placement^="top"] {
+  transform: translateY(-6px) !important;
+}
