@@ -1,5 +1,0 @@
-# Replacement rules for git-filter-repo to remove OpenAI style API keys
-# NOTE: This file will be used by git-filter-repo's --replace-text parameter.
-# regex:pattern==replacement
-regex:sk-proj-[A-Za-z0-9_\-]+==[REDACTED_OPENAI_API_KEY]
-regex:sk-[A-Za-z0-9_\-]{24,}==[REDACTED_OPENAI_API_KEY]
