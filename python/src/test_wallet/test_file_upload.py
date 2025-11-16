@@ -16,7 +16,7 @@ Then check that the file was uploaded successfully by looking at the file input 
 Report the result.
 """.strip()
 
-llm = ChatOpenAI(model='gpt-4o-mini', api_key="REDACTED_OPENAI_KEY")
+llm = ChatOpenAI(model='gpt-4o-mini', api_key=os.environ.get('OPENAI_API_KEY'))
 
 agent = Agent(
     task=task,

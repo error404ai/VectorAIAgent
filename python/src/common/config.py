@@ -18,9 +18,10 @@ logging.basicConfig(
 if sys.stdout and hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding='utf-8')  # type: ignore
 
-# Set up environment variables
-OPENAI_API_KEY = "REDACTED_OPENAI_KEY"
-os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
+# Set up environment usage - do NOT hardcode secrets in source.
+# When running locally, set OPENAI_API_KEY in your environment or use a
+# .env file (add .env to .gitignore).
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 # Set up paths
 def initialize_paths():

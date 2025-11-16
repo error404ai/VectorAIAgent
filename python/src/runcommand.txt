@@ -1,6 +1,6 @@
-./python/dist/whiskey_app.exe automation --prompt="go to https://www.browserscan.net and wait 30sec" --port="9222" --provider="openai" --model="gpt-4o" --api-key="REDACTED_OPENAI_KEY" --base-url="" --temperature="0.7" --browser-path="C:\Program Files\Google\Chrome\Application\chrome.exe"
+./python/dist/whiskey_app.exe automation --prompt="go to https://www.browserscan.net and wait 30sec" --port="9222" --provider="openai" --model="gpt-4o" --base-url="" --temperature="0.7" --browser-path="C:\Program Files\Google\Chrome\Application\chrome.exe" # ensure OPENAI_API_KEY is set as an environment variable
 
-uv run whiskey_app.py automation --prompt="go to https://demo.fingerprint.com/playground and wait 300sec" --port="9222" --provider="openai" --model="gpt-4o" --api-key="REDACTED_OPENAI_KEY" --base-url="" --temperature="0.7" --browser-path="C:\Program Files\Google\Chrome\Application\chrome.exe"
+uv run whiskey_app.py automation --prompt="go to https://demo.fingerprint.com/playground and wait 300sec" --port="9222" --provider="openai" --model="gpt-4o" --base-url="" --temperature="0.7" --browser-path="C:\Program Files\Google\Chrome\Application\chrome.exe" # ensure OPENAI_API_KEY is set as an environment variable
 
 ./python/dist/whiskey_app.exe profiles --list
 

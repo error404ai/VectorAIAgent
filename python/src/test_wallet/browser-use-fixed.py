@@ -792,7 +792,7 @@ async def run_agent_with_wallet(task: str):
         # Run the agent
         llm = ChatOpenAI(
             model='gpt-4o-mini',
-            api_key="REDACTED_OPENAI_KEY"
+            api_key=os.environ.get('OPENAI_API_KEY')
         )
         agent = Agent(task=task, llm=llm, browser_session=session)
         result = await agent.run()
