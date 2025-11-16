@@ -1,4 +1,4 @@
-# Vector AI Agent — Desktop Browser & Automation Agent
+# Vector AI Agent — Desktop Browser & Automation Agent - Chrome/Edge
 
 Vector AI Agent is a desktop browsing application that blends a full-featured web browser with a built-in automation assistant. It provides a practical environment to browse, automate tasks using natural language prompts, and manage multiple browser profiles and wallets — all in one self-contained desktop app.
 
