@@ -134,6 +134,9 @@ Continues automation instead of stopping
 
 # ⏱️ 10. Task Scheduler (Optional Add-on)
 
+<img width="1010" height="670" alt="Screenshot_52" src="https://github.com/user-attachments/assets/c6f273f9-b33d-4381-ba60-802274e8e099" />
+
+
 Run tasks at:
 
 Specific times
