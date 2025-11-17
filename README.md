@@ -49,6 +49,9 @@ Perfect for: farming, multi-account ops, token launches, data tasks.
 
 # 🔐 3. Vector Wallet Integration
 
+<img width="1013" height="671" alt="Screenshot_51" src="https://github.com/user-attachments/assets/e98d92d6-d15f-4e55-86e3-221dd81edd8f" />
+
+
 A built-in Phantom-style Solana wallet:
 
 Create/import wallets
