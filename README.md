@@ -33,6 +33,9 @@ The AI controls the browser like a real user.
 
 # 🔄 2. Multi-Profile Parallel Execution
 
+<img width="1012" height="671" alt="Screenshot_50" src="https://github.com/user-attachments/assets/4cde4b22-c940-426e-9fa9-b9f76195c858" />
+
+
 Run multiple browser profiles side-by-side:
 
 Separate cookies
