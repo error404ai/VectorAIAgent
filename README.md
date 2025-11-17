@@ -14,20 +14,191 @@ Vector AI Agent is designed to make routine web tasks easier by combining a norm
 
 ---
 
-## Key Features ✨
+## 🔥 Key Features
 
-- Natural language automation: Use the built-in prompt panel to describe the task you want the browser to perform.
-- Profile-based automation: Create and manage multiple browser profiles with isolated browsing state (cookies, storage, history), then target specific profiles for automation tasks.
-- Automation task management: Start, stop, and monitor automation tasks with console-style logs and task result summaries.
-- Prompt history & saved prompts: Reuse previous prompts or save common prompts as templates for repeatable workflows.
-- Wallet manager: Create wallets, view balances, set the active wallet, and use wallets as part of automation tasks.
-- Profile management: Create, open, delete, and bulk-manage profiles to run tasks across different browser states.
-- Settings & preferences: Control startup behavior (default URL), UI theme, and selected profile behavior.
-- Local storage & privacy: User data and settings are stored locally and persist between sessions; the application is privacy-minded and offers options to limit telemetry and external sync.
-- Isolation & safety: Automation runs in isolated webviews so the main UI remains responsive and secure while automation is performed separately.
-- Scheduling & multi-profile workflows: Build workflows and schedule or orchestrate them across several profiles.
+# 1. AI Browser Automation
 
----
+Automate any website with natural language:
+
+Click buttons
+
+Fill forms
+
+Scroll
+
+Navigate pages
+
+Upload/download files
+The AI controls the browser like a real user.
+
+# 🔄 2. Multi-Profile Parallel Execution
+
+Run multiple browser profiles side-by-side:
+
+Separate cookies
+
+Separate sessions
+
+Separate wallets
+
+Separate automation tasks
+Perfect for: farming, multi-account ops, token launches, data tasks.
+
+# 🔐 3. Vector Wallet Integration
+
+A built-in Phantom-style Solana wallet:
+
+Create/import wallets
+
+Auto-login
+
+Auto-sign transactions
+
+Link wallets to profiles
+
+Full dApp interaction (pump.fun, bonk.fun, Raydium, etc.)
+
+# ⚙️ 4. Natural Language Task Commands
+
+Just type what you want:
+
+“Open pump.fun and launch a token.”
+
+“Buy 1 SOL of this token with profile 3.”
+
+“Open Twitter and search #SOL.”
+AI executes the entire workflow automatically.
+
+# 🔗 5. Wallet–Profile Assignment
+
+Assign different wallets to different profiles for:
+
+Multi-wallet buys
+
+Multi-profile token launching
+
+Safe isolated testing
+
+Degen bot setups
+
+# 🤖 6. AI Task Orchestration
+
+The agent understands multi-step flows:
+
+Open site → interact → confirm → continue
+
+Handles navigation, buttons, text, dropdowns
+
+Auto-repeats steps if UI changes
+
+Self-corrects when confused
+
+# 🧩 7. Prompts & Templates
+
+Save frequently used commands:
+
+Buy templates
+
+Launch templates
+
+Web automation templates
+Quick access to common automations.
+
+# 🧠 8. AI Vision Element Detection
+
+(Works through DOM + visual understanding)
+
+Detects buttons, fields, menu items
+
+Handles dynamic or moving UI
+
+Works on complex sites (pump.fun, RaydiumCharts, booking sites)
+
+# ⚡ 9. Auto-Retry + Error Handling
+
+If something fails:
+
+AI retries
+
+Adapts to UI changes
+
+Corrects flow
+
+Continues automation instead of stopping
+
+# ⏱️ 10. Task Scheduler (Optional Add-on)
+
+Run tasks at:
+
+Specific times
+
+Intervals (every X minutes/hours)
+
+On repeat loops
+Useful for data checks, token monitoring, recurring tasks.
+
+# 🛡️ 11. Local-First Privacy
+
+No cloud
+
+No external storage
+
+Wallets stored locally
+
+Browser profiles local
+Your data never leaves your system.
+
+# 🌐 12. Works With Any Website
+
+Supports automation on:
+
+pump.fun
+
+bonk.fun
+
+Jupiter
+
+Raydium
+
+Twitter
+
+Booking portals
+
+Ticket portals
+
+E-commerce
+
+Any normal website
+
+# 📡 13. API Integration Support
+
+Users can plug in:
+
+Crypto price APIs
+
+News APIs
+
+RPC nodes
+
+Trading APIs
+
+Custom REST endpoints
+
+Or you can use a developer API key for onboarding.
+
+# 🔉 14. Voice-Controlled Automation (upcoming)
+
+Control tasks by simply speaking:
+
+“Open all profiles.”
+
+“Launch token.”
+
+“Buy 0.5 SOL.”
+
+# 🔗 15. Agent-to-Agent Collaboration (upcoming)
+
+One agent can gather data → another agent takes action.
 
 ## Quick Start — Running the App ▶️
 
