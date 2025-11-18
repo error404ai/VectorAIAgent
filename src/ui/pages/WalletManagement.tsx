@@ -34,7 +34,7 @@ function WalletManagement() {
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [newWalletName, setNewWalletName] = useState("");
   const [generateError, setGenerateError] = useState<string | null>(null);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [copiedFieldId, setCopiedFieldId] = useState<string | null>(null);
 
   // Load wallets
   const loadWallets = useCallback(async () => {
@@ -153,10 +153,15 @@ function WalletManagement() {
   };
 
   // Copy to clipboard
-  const handleCopy = (text: string, walletId: string) => {
+  const handleCopy = (
+    text: string,
+    walletId: string,
+    field: "public" | "secret",
+  ) => {
     navigator.clipboard.writeText(text);
-    setCopiedId(walletId);
-    setTimeout(() => setCopiedId(null), 2000);
+    const compositeId = `${walletId}-${field}`;
+    setCopiedFieldId(compositeId);
+    setTimeout(() => setCopiedFieldId(null), 2000);
   };
 
   return (
@@ -233,7 +238,7 @@ function WalletManagement() {
                         </code>
                         <button
                           onClick={() =>
-                            handleCopy(wallet.publicKey, wallet.id)
+                            handleCopy(wallet.publicKey, wallet.id, "public")
                           }
                           className="p-1 transition-colors hover:bg-white/10"
                           title="Copy public key"
@@ -241,7 +246,36 @@ function WalletManagement() {
                           <Copy
                             size={16}
                             className={
-                              copiedId === wallet.id
+                              copiedFieldId === `${wallet.id}-public`
+                                ? "text-green-400"
+                                : "text-white/60"
+                            }
+                          />
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="w-24 flex-shrink-0 text-white/60">
+                          Private Key:
+                        </span>
+                        <code className="flex-1 truncate bg-black/30 px-2 py-1 text-white/80">
+                          {wallet.secretKeyEncrypted}
+                        </code>
+                        <button
+                          onClick={() =>
+                            handleCopy(
+                              wallet.secretKeyEncrypted,
+                              wallet.id,
+                              "secret",
+                            )
+                          }
+                          className="p-1 transition-colors hover:bg-white/10"
+                          title="Copy private key"
+                        >
+                          <Copy
+                            size={16}
+                            className={
+                              copiedFieldId === `${wallet.id}-secret`
                                 ? "text-green-400"
                                 : "text-white/60"
                             }
