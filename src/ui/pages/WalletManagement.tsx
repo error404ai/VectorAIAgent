@@ -6,6 +6,7 @@ import {
   Wallet as WalletIcon,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import QRCode from "react-qr-code";
 import type { Window } from "../../../types/global-types";
 import Button from "../components/Button";
 import Card from "../components/Card";
@@ -281,6 +282,26 @@ function WalletManagement() {
                             }
                           />
                         </button>
+                      </div>
+
+                      <div className="flex items-start gap-2">
+                        <span className="w-24 flex-shrink-0 text-white/60">
+                          QR Code:
+                        </span>
+                        <div className="rounded bg-white p-2">
+                          <QRCode
+                            value={wallet.publicKey}
+                            size={80}
+                            style={{
+                              height: "auto",
+                              maxWidth: "100%",
+                              width: "100%",
+                            }}
+                          />
+                        </div>
+                        <div className="ml-2 text-xs text-white/60">
+                          Public Key QR
+                        </div>
                       </div>
 
                       <div className="flex items-center gap-2">

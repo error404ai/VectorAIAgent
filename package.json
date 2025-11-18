@@ -17,7 +17,6 @@
     "dist:linux": "npm run transpile:electron && npm run build && electron-builder --linux --x64"
   },
   "dependencies": {
-    "react-datepicker": "^4.17.0",
     "@libsql/client": "^0.15.8",
     "@types/uuid": "^10.0.0",
     "clsx": "^2.1.1",
@@ -27,8 +26,10 @@
     "drizzle-orm": "^0.44.2",
     "lucide-react": "^0.511.0",
     "react": "^19.1.0",
+    "react-datepicker": "^4.17.0",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.56.4",
+    "react-qr-code": "^2.0.18",
     "react-router": "^7.6.1",
     "tailwind-merge": "^3.3.0",
     "tailwindcss": "^4.1.7",
@@ -36,11 +37,11 @@
     "zustand": "^5.0.4"
   },
   "devDependencies": {
-    "@types/react-datepicker": "^4.4.6",
     "@eslint/js": "^9.25.0",
     "@tailwindcss/vite": "^4.1.7",
     "@types/plist": "^3.0.5",
     "@types/react": "^19.1.2",
+    "@types/react-datepicker": "^4.4.6",
     "@types/react-dom": "^19.1.2",
     "@types/verror": "^1.10.11",
     "@vitejs/plugin-react": "^4.4.1",
