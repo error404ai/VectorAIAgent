@@ -30,6 +30,7 @@ interface WalletPreparationResult {
 async function prepareWalletIntegration(
   taskTag: string,
   runtimeOptions?: AutomationRuntimeOptions,
+  profileName?: string,
 ): Promise<WalletPreparationResult> {
   const envVars: NodeJS.ProcessEnv = { ...process.env };
   const logs: string[] = [];
@@ -51,8 +52,8 @@ async function prepareWalletIntegration(
       if (runtimeOptions.walletId) {
         const wallets = await WalletService.getWallets();
         wallet = wallets.find((w) => w.id === runtimeOptions.walletId) || null;
-      } else {
-        wallet = await WalletService.getActiveWallet();
+      } else if (profileName) {
+        wallet = await WalletService.getWalletForProfile(profileName);
       }
     } catch (error) {
       console.error(`[WALLET] Failed to resolve wallet for ${taskTag}:`, error);
@@ -77,9 +78,9 @@ async function prepareWalletIntegration(
         logs,
         error: {
           message:
-            "Wallet attachment enabled but no active wallet is selected. Please set an active wallet.",
+            "Wallet attachment enabled but no wallet is assigned to this profile. Please assign a wallet to the profile.",
           logs: [
-            "ERROR: Wallet attachment enabled but no active wallet found. Configure an active wallet in Wallet Management.",
+            "ERROR: Wallet attachment enabled but no wallet found for profile. Configure wallet in Wallet Management.",
           ],
         },
       };
@@ -381,6 +382,7 @@ export function registerBrowserAutomationHandlers() {
         const walletPreparation = await prepareWalletIntegration(
           "LEGACY",
           runtimeOptions,
+          "default_profile",
         );
 
         if (walletPreparation.logs.length) {
@@ -697,6 +699,7 @@ export function registerBrowserAutomationHandlers() {
         const walletPreparation = await prepareWalletIntegration(
           taskId,
           runtimeOptions,
+          profile,
         );
 
         if (walletPreparation.logs.length) {

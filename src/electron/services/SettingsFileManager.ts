@@ -32,14 +32,13 @@ interface SolanaWallet {
   publicKey: string;
   secretKeyEncrypted: string;
   balance: number;
-  isActive: boolean;
+  profileId: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
 interface WalletSettings {
   wallets: SolanaWallet[];
-  activeWalletId?: string;
 }
 
 interface AppSettings {
@@ -154,7 +153,6 @@ export default class SettingsFileManager {
     },
     wallets: {
       wallets: [],
-      activeWalletId: undefined,
     },
   };
 

@@ -766,7 +766,7 @@ export const useAutomationStore = create<AutomationState>()(
           `Scheduling ${taskIds.length} tasks (stagger ${DELAY_BETWEEN_STARTS_MS}ms): ${profiles.join(", ")}`,
         );
 
-        const fetchActiveWallet = async () => {
+        const fetchWalletForProfile = async (profile: string) => {
           let walletState = useWalletStore.getState();
 
           if (!walletState.wallets.length) {
@@ -784,7 +784,11 @@ export const useAutomationStore = create<AutomationState>()(
             walletState = useWalletStore.getState();
           }
 
-          return walletState.wallets.find((wallet) => wallet.isActive) || null;
+          return (
+            walletState.wallets.find(
+              (wallet) => wallet.profileId === profile,
+            ) || null
+          );
         };
 
         profiles.forEach((profile, index) => {
@@ -810,28 +814,28 @@ export const useAutomationStore = create<AutomationState>()(
               const runtimeOptions: AutomationRuntimeOptions = {};
 
               if (attachWallet) {
-                const activeWallet = await fetchActiveWallet();
-                if (!activeWallet) {
+                const profileWallet = await fetchWalletForProfile(profile);
+                if (!profileWallet) {
                   get().addProfileLog(
                     profile,
-                    "ERROR: Wallet attachment enabled but no active wallet found. Please select an active wallet in Wallet Management.",
+                    "ERROR: Wallet attachment enabled but no wallet attached to this profile. Please attach a wallet in Wallet Management.",
                   );
                   get().updateProfileTask(profile, {
                     isRunning: false,
                     result: {
                       success: false,
                       message:
-                        "Wallet attachment enabled but no active wallet found.",
+                        "Wallet attachment enabled but no wallet attached to this profile.",
                     },
                   });
                   return;
                 }
 
                 runtimeOptions.useWallet = true;
-                runtimeOptions.walletId = activeWallet.id;
+                runtimeOptions.walletId = profileWallet.id;
                 get().addProfileLog(
                   profile,
-                  `[WALLET] Attaching wallet: ${activeWallet.name}`,
+                  `[WALLET] Attaching wallet: ${profileWallet.name}`,
                 );
               }
 

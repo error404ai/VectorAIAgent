@@ -88,7 +88,8 @@ const api = {
   updateWalletBalance: (walletId: string, rpcUrl?: string) =>
     ipcInvoke("updateWalletBalance", walletId, rpcUrl),
   deleteWallet: (walletId: string) => ipcInvoke("deleteWallet", walletId),
-  setActiveWallet: (walletId: string) => ipcInvoke("setActiveWallet", walletId),
+  setWalletProfile: (walletId: string, profileId: string | null) =>
+    ipcInvoke("setWalletProfile", walletId, profileId),
   updateWalletName: (walletId: string, name: string) =>
     ipcInvoke("updateWalletName", walletId, name),
 } satisfies IpcRendererAPI;

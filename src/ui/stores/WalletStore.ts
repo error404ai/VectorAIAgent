@@ -8,14 +8,13 @@ export interface SolanaWallet {
   publicKey: string;
   secretKeyEncrypted: string;
   balance: number;
-  isActive: boolean;
+  profileId: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
 interface WalletStore {
   wallets: SolanaWallet[];
-  activeWalletId?: string;
   isLoading: boolean;
   error: string | null;
   isGenerating: boolean;
@@ -24,7 +23,6 @@ interface WalletStore {
 
   // Actions
   setWallets: (wallets: SolanaWallet[]) => void;
-  setActiveWalletId: (id?: string) => void;
   setIsLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   setIsGenerating: (generating: boolean) => void;
@@ -33,12 +31,11 @@ interface WalletStore {
   removeUpdatingBalanceId: (id: string) => void;
 
   // Computed
-  getActiveWallet: () => SolanaWallet | undefined;
+  getWalletForProfile: (profileId: string) => SolanaWallet | undefined;
 }
 
 export const useWalletStore = create<WalletStore>((set, get) => ({
   wallets: [],
-  activeWalletId: undefined,
   isLoading: false,
   error: null,
   isGenerating: false,
@@ -46,7 +43,6 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
   updatingBalanceIds: new Set<string>(),
 
   setWallets: (wallets) => set({ wallets }),
-  setActiveWalletId: (id) => set({ activeWalletId: id }),
   setIsLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error }),
   setIsGenerating: (generating) => set({ isGenerating: generating }),
@@ -62,8 +58,8 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
       return { updatingBalanceIds: newSet };
     }),
 
-  getActiveWallet: () => {
-    const { wallets, activeWalletId } = get();
-    return wallets.find((w) => w.id === activeWalletId);
+  getWalletForProfile: (profileId: string) => {
+    const { wallets } = get();
+    return wallets.find((w) => w.profileId === profileId);
   },
 }));

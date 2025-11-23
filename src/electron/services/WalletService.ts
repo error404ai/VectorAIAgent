@@ -8,14 +8,13 @@ export interface SolanaWallet {
   publicKey: string;
   secretKeyEncrypted: string;
   balance: number;
-  isActive: boolean;
+  profileId: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface WalletSettings {
   wallets: SolanaWallet[];
-  activeWalletId?: string;
 }
 
 class WalletService {
@@ -23,13 +22,9 @@ class WalletService {
     return SettingsFileManager.getWalletSettings().wallets;
   }
 
-  async getActiveWallet(): Promise<SolanaWallet | null> {
+  async getWalletForProfile(profileId: string): Promise<SolanaWallet | null> {
     const settings = SettingsFileManager.getWalletSettings();
-    if (!settings.activeWalletId) return null;
-
-    return (
-      settings.wallets.find((w) => w.id === settings.activeWalletId) || null
-    );
+    return settings.wallets.find((w) => w.profileId === profileId) || null;
   }
 
   async addWallet(
@@ -59,11 +54,6 @@ class WalletService {
       };
 
       settings.wallets.push(newWallet);
-
-      // If this is the first wallet, make it active
-      if (settings.wallets.length === 1) {
-        settings.activeWalletId = newWallet.id;
-      }
 
       SettingsFileManager.saveWalletSettings(settings);
 
@@ -120,12 +110,6 @@ class WalletService {
 
       settings.wallets.splice(walletIndex, 1);
 
-      // If deleted wallet was active, set another wallet as active
-      if (settings.activeWalletId === walletId) {
-        settings.activeWalletId =
-          settings.wallets.length > 0 ? settings.wallets[0].id : undefined;
-      }
-
       SettingsFileManager.saveWalletSettings(settings);
 
       return { success: true };
@@ -138,8 +122,9 @@ class WalletService {
     }
   }
 
-  async setActiveWallet(
+  async setWalletProfile(
     walletId: string,
+    profileId: string | null,
   ): Promise<{ success: boolean; message?: string }> {
     try {
       const settings = SettingsFileManager.getWalletSettings();
@@ -149,19 +134,29 @@ class WalletService {
         return { success: false, message: "Wallet not found" };
       }
 
-      // Update all wallets' isActive status
-      settings.wallets = settings.wallets.map((w) => ({
-        ...w,
-        isActive: w.id === walletId,
-      }));
+      // If assigning to a profile, ensure no other wallet is assigned to this profile
+      if (profileId) {
+        settings.wallets = settings.wallets.map((w) => {
+          if (w.profileId === profileId && w.id !== walletId) {
+            return { ...w, profileId: null };
+          }
+          return w;
+        });
+      }
 
-      settings.activeWalletId = walletId;
+      // Update the target wallet
+      const targetWalletIndex = settings.wallets.findIndex(
+        (w) => w.id === walletId,
+      );
+      if (targetWalletIndex !== -1) {
+        settings.wallets[targetWalletIndex].profileId = profileId;
+      }
 
       SettingsFileManager.saveWalletSettings(settings);
 
       return { success: true };
     } catch (error) {
-      console.error("Error setting active wallet:", error);
+      console.error("Error setting wallet profile:", error);
       return {
         success: false,
         message: error instanceof Error ? error.message : "Unknown error",

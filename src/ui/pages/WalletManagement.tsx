@@ -13,6 +13,9 @@ import Card from "../components/Card";
 import Input from "../components/Input";
 import Modal from "../components/Modal";
 import PageTitle from "../components/PageTitle";
+import { SelectDropdown } from "../components/SelectDropdown";
+import BrowserSettingsService from "../services/BrowserSettingsService";
+import { useBrowserSettingsStore } from "../stores/BrowserSettingsStore";
 import { useWalletStore, type SolanaWallet } from "../stores/WalletStore";
 
 declare const window: Window;
@@ -31,6 +34,8 @@ function WalletManagement() {
     addUpdatingBalanceId,
     removeUpdatingBalanceId,
   } = useWalletStore();
+
+  const { settings, setSettings } = useBrowserSettingsStore();
 
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [newWalletName, setNewWalletName] = useState("");
@@ -61,7 +66,9 @@ function WalletManagement() {
   // Initial load
   useEffect(() => {
     loadWallets();
-  }, [loadWallets]);
+    // Load browser settings to get profiles
+    BrowserSettingsService.getSettings().then(setSettings).catch(console.error);
+  }, [loadWallets, setSettings]);
 
   // Generate new wallet
   const handleGenerateWallet = async () => {
@@ -137,19 +144,25 @@ function WalletManagement() {
     }
   };
 
-  // Set active wallet
-  const handleSetActiveWallet = async (walletId: string) => {
+  // Set wallet profile
+  const handleSetWalletProfile = async (
+    walletId: string,
+    profileId: string | null,
+  ) => {
     try {
-      const result = await window.electronAPI.setActiveWallet(walletId);
+      const result = await window.electronAPI.setWalletProfile(
+        walletId,
+        profileId,
+      );
 
       if (result.success) {
-        await loadWallets(); // Reload to update active status
+        await loadWallets(); // Reload to update profile status
       } else {
-        alert(result.message || "Failed to set active wallet");
+        alert(result.message || "Failed to set wallet profile");
       }
     } catch (err) {
-      console.error("Failed to set active wallet:", err);
-      alert("Failed to set active wallet");
+      console.error("Failed to set wallet profile:", err);
+      alert("Failed to set wallet profile");
     }
   };
 
@@ -164,6 +177,14 @@ function WalletManagement() {
     setCopiedFieldId(compositeId);
     setTimeout(() => setCopiedFieldId(null), 2000);
   };
+
+  const profileOptions = [
+    { id: "", label: "No Profile" },
+    ...(settings.availableProfiles || ["default_profile"]).map((p) => ({
+      id: p,
+      label: p,
+    })),
+  ];
 
   return (
     <div className="flex h-full flex-col select-none">
@@ -222,9 +243,9 @@ function WalletManagement() {
                       <h3 className="truncate text-lg font-medium text-white">
                         {wallet.name}
                       </h3>
-                      {wallet.isActive && (
-                        <span className="border border-green-500 bg-green-500/20 px-2 py-0.5 text-xs text-green-400">
-                          ACTIVE
+                      {wallet.profileId && (
+                        <span className="border border-blue-500 bg-blue-500/20 px-2 py-0.5 text-xs text-blue-400">
+                          {wallet.profileId}
                         </span>
                       )}
                     </div>
@@ -335,21 +356,23 @@ function WalletManagement() {
                     </div>
                   </div>
 
-                  <div className="ml-4 flex gap-2">
-                    {!wallet.isActive && (
-                      <button
-                        onClick={() => handleSetActiveWallet(wallet.id)}
-                        className="border border-blue-500 px-3 py-1 text-sm text-blue-400 transition-colors hover:bg-blue-500/20"
-                      >
-                        Set Active
-                      </button>
-                    )}
+                  <div className="ml-4 flex min-w-[200px] flex-col gap-2">
+                    <SelectDropdown
+                      options={profileOptions}
+                      value={wallet.profileId || ""}
+                      onChange={(val) =>
+                        handleSetWalletProfile(wallet.id, val || null)
+                      }
+                      placeholder="Assign to Profile"
+                      label="Assigned Profile"
+                    />
                     <button
                       onClick={() => handleDeleteWallet(wallet)}
-                      className="p-2 text-red-400 transition-colors hover:bg-red-500/20"
+                      className="flex items-center justify-center gap-2 rounded border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400 transition-colors hover:bg-red-500/20"
                       title="Delete wallet"
                     >
                       <Trash2 size={16} />
+                      <span>Delete Wallet</span>
                     </button>
                   </div>
                 </div>

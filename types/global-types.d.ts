@@ -250,7 +250,7 @@ export type IpcChannelMap = {
         publicKey: string;
         secretKeyEncrypted: string;
         balance: number;
-        isActive: boolean;
+        profileId: string | null;
         createdAt: string;
         updatedAt: string;
       }>;
@@ -267,7 +267,7 @@ export type IpcChannelMap = {
         publicKey: string;
         secretKeyEncrypted: string;
         balance: number;
-        isActive: boolean;
+        profileId: string | null;
         createdAt: string;
         updatedAt: string;
       };
@@ -286,8 +286,8 @@ export type IpcChannelMap = {
     args: [walletId: string];
     return: { success: boolean; message?: string };
   };
-  setActiveWallet: {
-    args: [walletId: string];
+  setWalletProfile: {
+    args: [walletId: string, profileId: string | null];
     return: { success: boolean; message?: string };
   };
   updateWalletName: {

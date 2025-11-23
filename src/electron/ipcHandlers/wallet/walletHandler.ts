@@ -184,7 +184,7 @@ export default function registerWalletHandlers() {
         publicKey: walletData.publicKey as string,
         secretKeyEncrypted: walletData.secretKey as string, // TODO: Add encryption
         balance: 0,
-        isActive: false,
+        profileId: null,
       });
 
       return addResult;
@@ -256,10 +256,13 @@ export default function registerWalletHandlers() {
     return await WalletService.deleteWallet(walletId);
   });
 
-  // Set active wallet
-  ipcMainHandle("setActiveWallet", async (walletId: string) => {
-    return await WalletService.setActiveWallet(walletId);
-  });
+  // Set wallet profile
+  ipcMainHandle(
+    "setWalletProfile",
+    async (walletId: string, profileId: string | null) => {
+      return await WalletService.setWalletProfile(walletId, profileId);
+    },
+  );
 
   // Update wallet name
   ipcMainHandle("updateWalletName", async (walletId: string, name: string) => {

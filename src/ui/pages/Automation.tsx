@@ -75,7 +75,7 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
   }, [wallets.length, setWallets]);
 
   const attachWallet = profileState.attachWallet;
-  const activeWallet = wallets.find((wallet) => wallet.isActive);
+  const activeWallet = wallets.find((wallet) => wallet.profileId === profile);
 
   const ensureActiveWallet = useCallback(async () => {
     let currentWallets = wallets;
@@ -95,8 +95,10 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
       }
     }
 
-    return currentWallets.find((wallet) => wallet.isActive) || null;
-  }, [wallets, setWallets]);
+    return (
+      currentWallets.find((wallet) => wallet.profileId === profile) || null
+    );
+  }, [wallets, setWallets, profile]);
 
   const handlePromptChange = (value: string) => {
     setLocalPrompt(value);
@@ -168,7 +170,7 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
 
         if (!walletToUse) {
           const message =
-            "Wallet attachment enabled but no active wallet selected. Please choose an active wallet in Wallet Management.";
+            "Wallet attachment enabled but no wallet attached to this profile. Please attach a wallet in Wallet Management.";
           addProfileLog(profile, `ERROR: ${message}`);
           updateProfileTask(profile, {
             isRunning: false,
@@ -329,13 +331,13 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
           >
             {attachWallet
               ? activeWallet
-                ? `Active wallet: ${activeWallet.name}`
-                : "No active wallet selected"
+                ? `Attached wallet: ${activeWallet.name}`
+                : "No wallet attached to this profile"
               : "Disabled"}
           </div>
           {attachWallet && !activeWallet && (
             <div className="text-xs text-red-300">
-              Select an active wallet in Wallet Management.
+              Attach a wallet to this profile in Wallet Management.
             </div>
           )}
         </div>
