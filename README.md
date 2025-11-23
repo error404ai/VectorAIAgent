@@ -12,7 +12,7 @@ Vector AI Agent is a desktop browsing application that blends a full-featured we
 
 Vector AI Agent is designed to make routine web tasks easier by combining a normal browsing experience with an automation-first interface. Users can manually browse, store bookmarks, and manage tabs — and switch to the assistant to instruct the application in natural language to run automation tasks. Automation tasks run in isolated browser profiles, keeping the UI and the automated content separate for safety and clarity.
 
----
+----
 
 ## 🔥 Key Features
 
