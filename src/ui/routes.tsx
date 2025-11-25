@@ -5,6 +5,7 @@ import AIModelTab from "./pages/AISettings/AIModelTab";
 import AISettingsPage from "./pages/AISettingsPage";
 import Automation from "./pages/Automation";
 import BrowserSettingsPage from "./pages/BrowserSettingsPage";
+import Contact from "./pages/Contact";
 import MultiProfileAutomation from "./pages/MultiProfileAutomation";
 import MultiProfileAutomationScheduled from "./pages/MultiProfileAutomation/MultiProfileAutomationScheduled";
 import MultiProfileAutomationTasks from "./pages/MultiProfileAutomation/MultiProfileAutomationTasks";
@@ -67,6 +68,10 @@ export const router = createMemoryRouter([
       {
         path: "browser-settings",
         element: <BrowserSettingsPage />,
+      },
+      {
+        path: "contact",
+        element: <Contact />,
       },
     ],
   },

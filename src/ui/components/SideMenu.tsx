@@ -1,4 +1,12 @@
-import { Cpu, Monitor, Terminal, User, Users, Wallet } from "lucide-react";
+import {
+  Cpu,
+  Mail,
+  Monitor,
+  Terminal,
+  User,
+  Users,
+  Wallet,
+} from "lucide-react";
 import { Link, useLocation } from "react-router";
 import desktopIcon from "../../../desktopIcon.png";
 import { cn } from "../utils/cn";
@@ -35,6 +43,11 @@ function SideMenu() {
       name: "Browser",
       path: "/browser-settings",
       icon: Monitor,
+    },
+    {
+      name: "Contact",
+      path: "/contact",
+      icon: Mail,
     },
   ];
   return (
