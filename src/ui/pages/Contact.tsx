@@ -13,8 +13,8 @@ function Contact() {
     {
       icon: Globe,
       label: "Website",
-      value: "www.vectoraiagent.com",
-      href: "https://www.vectoraiagent.com",
+      value: "www.vectoragent.io",
+      href: "https://www.vectoragent.io",
     },
     {
       icon: Github,
