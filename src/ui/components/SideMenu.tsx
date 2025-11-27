@@ -1,4 +1,5 @@
 import {
+  Brain,
   Cpu,
   Mail,
   Monitor,
@@ -45,6 +46,11 @@ function SideMenu() {
       icon: Monitor,
     },
     {
+      name: "Memory",
+      path: "/memory",
+      icon: Brain,
+    },
+    {
       name: "Contact",
       path: "/contact",
       icon: Mail,
@@ -57,7 +63,7 @@ function SideMenu() {
           key={item.path}
           to={item.path}
           className={cn(
-            "flex h-20 w-full cursor-default flex-col items-center justify-center gap-1 transition-all select-none",
+            "flex h-18 w-full cursor-default flex-col items-center justify-center gap-1 transition-all select-none",
             {
               "bg-gradient-to-tr from-sky-800 via-blue-600 to-cyan-500 text-white shadow-[0px_15px_55px_-13px_rgba(0,0,0,0.3)] shadow-blue-600":
                 location.pathname === item.path,
@@ -66,7 +72,7 @@ function SideMenu() {
             },
           )}
         >
-          <item.icon size={26} />
+          <item.icon size={24} />
           <div className="font-base text-center text-sm">{item.name}</div>
         </Link>
       ))}
