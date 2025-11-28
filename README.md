@@ -1,8 +1,6 @@
+# Vector AI Agent — Desktop Browser & Automation Agent - Chrome/Edge
 
-
-# Vector AI Agent — Desktop Browser & Automation Agent - Chrome/Edge 
 <img width="1536" height="1024" alt="20251116_2156_4K Promo Vector_remix_01ka6qqae7fea96rdm6kg99q3t (1)" src="https://github.com/user-attachments/assets/322a27fa-f210-4965-9bd2-d17e5e2fbdd7" />
-
 
 Vector AI Agent is a desktop browsing application that blends a full-featured web browser with a built-in automation assistant. It provides a practical environment to browse, automate tasks using natural language prompts, and manage multiple browser profiles and wallets — all in one self-contained desktop app.
 
@@ -12,7 +10,7 @@ Vector AI Agent is a desktop browsing application that blends a full-featured we
 
 Vector AI Agent is designed to make routine web tasks easier by combining a normal browsing experience with an automation-first interface. Users can manually browse, store bookmarks, and manage tabs — and switch to the assistant to instruct the application in natural language to run automation tasks. Automation tasks run in isolated browser profiles, keeping the UI and the automated content separate for safety and clarity.
 
-----
+---
 
 ## 🔥 Key Features
 
@@ -35,7 +33,6 @@ The AI controls the browser like a real user.
 
 <img width="1012" height="671" alt="Screenshot_50" src="https://github.com/user-attachments/assets/4cde4b22-c940-426e-9fa9-b9f76195c858" />
 
-
 Run multiple browser profiles side-by-side:
 
 Separate cookies
@@ -50,7 +47,6 @@ Perfect for: farming, multi-account ops, token launches, data tasks.
 # 🔐 3. Vector Wallet Integration
 
 <img width="1013" height="671" alt="Screenshot_51" src="https://github.com/user-attachments/assets/e98d92d6-d15f-4e55-86e3-221dd81edd8f" />
-
 
 A built-in Phantom-style Solana wallet:
 
@@ -135,7 +131,6 @@ Continues automation instead of stopping
 # ⏱️ 10. Task Scheduler (Optional Add-on)
 
 <img width="1010" height="670" alt="Screenshot_52" src="https://github.com/user-attachments/assets/c6f273f9-b33d-4381-ba60-802274e8e099" />
-
 
 Run tasks at:
 
@@ -280,7 +275,7 @@ Contributions are appreciated — check `CONTRIBUTING.md` for more details.
 
 ## Troubleshooting & Tips ⚠️
 
-- If automation tasks fail to start, confirm that a profile is selected, and that any runtime options (like wallet attachment or file directories) are configured.
+- If automation tasks fail to start, confirm that a profile is selected, and that any runtime options (like file directories) are configured. Wallet attachment is automatically enabled when a wallet is assigned to the profile.
 - When using an external automation client or script, double-check that the automation endpoint and debug port shown in the UI are reachable.
 - If a profile-based task is not behaving consistently, try running it in a fresh profile to isolate session-dependent state.
 

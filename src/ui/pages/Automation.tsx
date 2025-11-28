@@ -27,7 +27,6 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
     stopProfileTask,
     canCreateTaskForProfile,
     setProfilePrompt,
-    setProfileAttachWallet,
     startProfileTask,
     updateProfileTask,
   } = useAutomationStore();
@@ -73,32 +72,6 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
       isMounted = false;
     };
   }, [wallets.length, setWallets]);
-
-  const attachWallet = profileState.attachWallet;
-  const activeWallet = wallets.find((wallet) => wallet.profileId === profile);
-
-  const ensureActiveWallet = useCallback(async () => {
-    let currentWallets = wallets;
-
-    if (!currentWallets.length) {
-      try {
-        const result = await (
-          window as unknown as Window
-        ).electronAPI.getWallets();
-
-        if (result.success && result.wallets) {
-          setWallets(result.wallets);
-          currentWallets = result.wallets;
-        }
-      } catch (error) {
-        console.error("Failed to load wallets:", error);
-      }
-    }
-
-    return (
-      currentWallets.find((wallet) => wallet.profileId === profile) || null
-    );
-  }, [wallets, setWallets, profile]);
 
   const handlePromptChange = (value: string) => {
     setLocalPrompt(value);
@@ -157,20 +130,19 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
       // Clear previous logs for this profile
       clearProfileLogs(profile);
 
-      const currentProfileState = getProfileState(profile);
-      const shouldAttachWallet = currentProfileState.attachWallet;
+      const activeWalletForTask = wallets.find(
+        (wallet) => wallet.profileId === profile,
+      );
+      const shouldAttachWallet = !!activeWalletForTask;
 
       const runtimeOptions: AutomationRuntimeOptions = {};
 
       if (shouldAttachWallet) {
-        const walletToUse =
-          activeWallet && wallets.length
-            ? activeWallet
-            : await ensureActiveWallet();
+        const walletToUse = activeWalletForTask || (await ensureActiveWallet());
 
         if (!walletToUse) {
           const message =
-            "Wallet attachment enabled but no wallet attached to this profile. Please attach a wallet in Wallet Management.";
+            "No wallet assigned to this profile. Please assign a wallet in Wallet Management.";
           addProfileLog(profile, `ERROR: ${message}`);
           updateProfileTask(profile, {
             isRunning: false,
@@ -266,10 +238,6 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
     }
   };
 
-  const handleToggleWallet = () => {
-    setProfileAttachWallet(profile, !attachWallet);
-  };
-
   const handleStopTask = async () => {
     try {
       await stopProfileTask(profile);
@@ -320,40 +288,6 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
           <div>{profileState.result.message}</div>
         </div>
       )}
-
-      <div className="flex items-center justify-between border border-white/20 bg-black/30 px-4 py-3 text-sm">
-        <div className="min-w-0">
-          <div className="text-xs tracking-wide text-white/40 uppercase">
-            Wallet Attachment
-          </div>
-          <div
-            className={`text-sm ${attachWallet && !activeWallet ? "text-red-300" : "text-white/70"}`}
-          >
-            {attachWallet
-              ? activeWallet
-                ? `Attached wallet: ${activeWallet.name}`
-                : "No wallet attached to this profile"
-              : "Disabled"}
-          </div>
-          {attachWallet && !activeWallet && (
-            <div className="text-xs text-red-300">
-              Attach a wallet to this profile in Wallet Management.
-            </div>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={handleToggleWallet}
-          disabled={isRunning}
-          className={`border px-3 py-1 text-xs font-semibold transition-colors ${
-            attachWallet
-              ? "border-green-500 text-green-300 hover:bg-green-500/20"
-              : "border-white/30 text-white hover:bg-white/10"
-          } disabled:cursor-not-allowed disabled:opacity-60`}
-        >
-          {attachWallet ? "Disable" : "Enable"}
-        </button>
-      </div>
 
       {/* Form for entering prompt */}
       <form

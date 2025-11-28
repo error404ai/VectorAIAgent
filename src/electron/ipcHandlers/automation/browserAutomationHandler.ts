@@ -78,9 +78,9 @@ async function prepareWalletIntegration(
         logs,
         error: {
           message:
-            "Wallet attachment enabled but no wallet is assigned to this profile. Please assign a wallet to the profile.",
+            "No wallet assigned to this profile. Please assign a wallet to the profile.",
           logs: [
-            "ERROR: Wallet attachment enabled but no wallet found for profile. Configure wallet in Wallet Management.",
+            "ERROR: No wallet found for profile. Configure wallet in Wallet Management.",
           ],
         },
       };

@@ -19,7 +19,6 @@ export interface AutomationTask {
     logs?: string[];
   } | null;
   createdAt: Date;
-  attachWallet?: boolean;
 }
 
 export interface SavedPrompt {
@@ -63,7 +62,6 @@ export interface ProfileAutomationState {
     logs?: string[];
   } | null;
   isRunning: boolean;
-  attachWallet: boolean;
 }
 
 export interface AutomationState {
@@ -134,7 +132,6 @@ export interface AutomationState {
   stopProfileTask: (profile: string) => Promise<void>;
   canCreateTaskForProfile: (profile: string) => boolean;
   setProfilePrompt: (profile: string, prompt: string) => void;
-  setProfileAttachWallet: (profile: string, attach: boolean) => void;
   getRunningProfilesCount: () => number;
   hasAnyRunningOrQueuedTasks: () => boolean;
   startProfileTask: (profile: string) => void;
@@ -311,7 +308,6 @@ export const useAutomationStore = create<AutomationState>()(
                 logs: [],
                 result: null,
                 isRunning: false,
-                attachWallet: false,
               },
             },
           }));
@@ -321,7 +317,6 @@ export const useAutomationStore = create<AutomationState>()(
             logs: [],
             result: null,
             isRunning: false,
-            attachWallet: false,
           };
         }
         return state.profileStates[profile];
@@ -347,7 +342,6 @@ export const useAutomationStore = create<AutomationState>()(
           logs: [],
           result: null,
           createdAt: new Date(),
-          attachWallet: profileState.attachWallet,
         };
 
         set((state) => ({
@@ -406,7 +400,6 @@ export const useAutomationStore = create<AutomationState>()(
                   logs: [log],
                   result: null,
                   isRunning: false,
-                  attachWallet: false,
                 },
               },
             };
@@ -447,7 +440,6 @@ export const useAutomationStore = create<AutomationState>()(
                   logs: logs,
                   result: null,
                   isRunning: false,
-                  attachWallet: false,
                 },
               },
             };
@@ -541,7 +533,6 @@ export const useAutomationStore = create<AutomationState>()(
             logs: [],
             result: null,
             isRunning: false,
-            attachWallet: false,
           };
 
           return {
@@ -551,38 +542,6 @@ export const useAutomationStore = create<AutomationState>()(
                 ...profileState,
                 prompt,
               },
-            },
-          };
-        });
-      },
-
-      setProfileAttachWallet: (profile: string, attach: boolean) => {
-        set((state) => {
-          const profileState = state.profileStates[profile] || {
-            currentTask: null,
-            prompt: "",
-            logs: [],
-            result: null,
-            isRunning: false,
-            attachWallet: false,
-          };
-
-          const updatedProfileState: ProfileAutomationState = {
-            ...profileState,
-            attachWallet: attach,
-          };
-
-          if (profileState.currentTask) {
-            updatedProfileState.currentTask = {
-              ...profileState.currentTask,
-              attachWallet: attach,
-            };
-          }
-
-          return {
-            profileStates: {
-              ...state.profileStates,
-              [profile]: updatedProfileState,
             },
           };
         });
@@ -809,28 +768,10 @@ export const useAutomationStore = create<AutomationState>()(
                 ),
               }));
 
-              const profileState = get().getProfileState(profile);
-              const attachWallet = profileState.attachWallet;
               const runtimeOptions: AutomationRuntimeOptions = {};
 
-              if (attachWallet) {
-                const profileWallet = await fetchWalletForProfile(profile);
-                if (!profileWallet) {
-                  get().addProfileLog(
-                    profile,
-                    "ERROR: Wallet attachment enabled but no wallet attached to this profile. Please attach a wallet in Wallet Management.",
-                  );
-                  get().updateProfileTask(profile, {
-                    isRunning: false,
-                    result: {
-                      success: false,
-                      message:
-                        "Wallet attachment enabled but no wallet attached to this profile.",
-                    },
-                  });
-                  return;
-                }
-
+              const profileWallet = await fetchWalletForProfile(profile);
+              if (profileWallet) {
                 runtimeOptions.useWallet = true;
                 runtimeOptions.walletId = profileWallet.id;
                 get().addProfileLog(
