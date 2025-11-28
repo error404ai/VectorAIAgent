@@ -138,7 +138,7 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
       const runtimeOptions: AutomationRuntimeOptions = {};
 
       if (shouldAttachWallet) {
-        const walletToUse = activeWalletForTask || (await ensureActiveWallet());
+        const walletToUse = activeWalletForTask;
 
         if (!walletToUse) {
           const message =
