@@ -9,8 +9,8 @@ import {
   Wallet,
 } from "lucide-react";
 import { Link, useLocation } from "react-router";
-import desktopIcon from "../../../desktopIcon.png";
 import { cn } from "../utils/cn";
+import AccountMenu from "./AccountMenu";
 
 function SideMenu() {
   const location = useLocation();
@@ -63,7 +63,7 @@ function SideMenu() {
           key={item.path}
           to={item.path}
           className={cn(
-            "flex h-18 w-full cursor-default flex-col items-center justify-center gap-1 transition-all select-none",
+            "flex h-17 w-full cursor-default flex-col items-center justify-center gap-1 transition-all select-none",
             {
               "bg-gradient-to-tr from-sky-800 via-blue-600 to-cyan-500 text-white shadow-[0px_15px_55px_-13px_rgba(0,0,0,0.3)] shadow-blue-600":
                 location.pathname === item.path,
@@ -77,15 +77,21 @@ function SideMenu() {
         </Link>
       ))}
 
-      <div className="mx-auto mt-auto flex w-full items-center justify-center gap-2 border-gray-700 px-0 pt-0 pb-1 shadow-inner">
-        <img
-          src={desktopIcon}
-          alt="app logo"
-          className="h-6 w-6 object-contain"
-        />
-        <span className="text-[9px] font-semibold tracking-wide text-gray-200">
-          Vector AI Agent
-        </span>
+      {/* Account Menu Section */}
+      <div className="mt-auto border-t border-gray-700">
+        <div className="p-2">
+          <AccountMenu />
+        </div>
+        {/* <div className="mx-auto flex w-full items-center justify-center gap-2 border-gray-700 px-0 pt-0 pb-1 shadow-inner">
+          <img
+            src={desktopIcon}
+            alt="app logo"
+            className="h-6 w-6 object-contain"
+          />
+          <span className="text-[9px] font-semibold tracking-wide text-gray-200">
+            Vector AI Agent
+          </span>
+        </div> */}
       </div>
     </div>
   );
