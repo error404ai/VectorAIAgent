@@ -15,6 +15,7 @@ export interface AuthState {
   loggingOut: boolean;
   authInitialized: boolean;
   guestSignupAttempted: boolean;
+  needsAuthChoice: boolean;
 }
 
 const initialState: AuthState = {
@@ -26,6 +27,7 @@ const initialState: AuthState = {
   loggingOut: false,
   authInitialized: false,
   guestSignupAttempted: false,
+  needsAuthChoice: false,
 };
 
 export const authSlice = createSlice({
@@ -59,7 +61,10 @@ export const authSlice = createSlice({
       state.isGuest = false;
       state.tokenExpired = false;
       state.loggingOut = false;
-      state.authInitialized = false;
+      // Keep authInitialized true so we don't show loading, just show the modal
+      state.authInitialized = true;
+      // Show auth choice modal after logout
+      state.needsAuthChoice = true;
       // Don't reset guestSignupAttempted - we want to remember we tried
     },
 
@@ -78,6 +83,10 @@ export const authSlice = createSlice({
     setGuestSignupAttempted: (state, action: PayloadAction<boolean>) => {
       state.guestSignupAttempted = action.payload;
     },
+
+    setNeedsAuthChoice: (state, action: PayloadAction<boolean>) => {
+      state.needsAuthChoice = action.payload;
+    },
   },
 });
 
@@ -90,6 +99,7 @@ export const {
   setLoggingOut,
   setAuthInitialized,
   setGuestSignupAttempted,
+  setNeedsAuthChoice,
 } = authSlice.actions;
 
 export default authSlice.reducer;

@@ -88,27 +88,35 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
     prompt: string,
     automationData: AutomationResultData | null | undefined,
     logs: string[],
+    fallbackSuccess?: boolean,
+    fallbackMessage?: string,
   ) => {
-    if (!automationData) {
-      console.log("No automation data to save");
-      return;
-    }
-
     try {
+      // Extract errors from logs if no automation data
+      const extractedErrors = logs
+        .filter((log) => log.startsWith("ERROR:"))
+        .map((log) => log.replace("ERROR: ", ""));
+
       const taskPayload = {
         prompt: prompt,
         logs: logs.join("\n"),
-        steps: automationData.steps
+        steps: automationData?.steps
           ? JSON.stringify(automationData.steps)
           : undefined,
-        provider: automationData.provider || modelConfig.provider,
-        model: automationData.model || modelConfig.model,
-        success: automationData.success,
-        message: automationData.message || automationData.final_result,
-        total_steps: automationData.total_steps,
-        total_duration_seconds: automationData.duration_seconds,
-        urls_visited: automationData.urls_visited?.join(", "),
-        errors: automationData.errors?.join("\n"),
+        provider: automationData?.provider || modelConfig.provider,
+        model: automationData?.model || modelConfig.model,
+        success: automationData?.success ?? fallbackSuccess ?? false,
+        message:
+          automationData?.message ||
+          automationData?.final_result ||
+          fallbackMessage ||
+          "Task completed",
+        total_steps: automationData?.total_steps ?? 0,
+        total_duration_seconds: automationData?.duration_seconds ?? 0,
+        urls_visited: automationData?.urls_visited?.join(", "),
+        errors:
+          automationData?.errors?.join("\n") ||
+          (extractedErrors.length > 0 ? extractedErrors.join("\n") : undefined),
       };
 
       const result = await createAgentTask(taskPayload).unwrap();
@@ -255,6 +263,8 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
           trimmedPrompt,
           response.automationData,
           response.logs || [],
+          true,
+          response.message,
         );
 
         updateProfileTask(profile, {
@@ -274,14 +284,14 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
           },
         });
 
-        // Still try to save failed automation data for analysis
-        if (response.automationData) {
-          await saveAutomationData(
-            trimmedPrompt,
-            response.automationData,
-            response.logs || [],
-          );
-        }
+        // Always save failed automation data for analysis (even without automationData)
+        await saveAutomationData(
+          trimmedPrompt,
+          response.automationData,
+          response.logs || [],
+          false,
+          response.message,
+        );
       }
 
       if (response.logs && response.logs.length > 0) {
@@ -296,6 +306,15 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
       console.error("Error starting automation:", error);
       const message = (error as Error).message;
       addProfileLog(profile, `ERROR: Failed to start automation: ${message}`);
+
+      // Save error data to backend for analysis
+      await saveAutomationData(
+        trimmedPrompt,
+        null,
+        profileState.logs,
+        false,
+        `Failed to start automation: ${message}`,
+      );
 
       const latestState = getProfileState(profile);
       if (latestState.currentTask) {

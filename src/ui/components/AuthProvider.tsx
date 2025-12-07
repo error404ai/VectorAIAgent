@@ -1,36 +1,34 @@
 import { useCallback, useEffect } from "react";
 import authManager from "../helpers/authManager";
-import {
-  useGuestSignupMutation,
-  useLazyGetProfileQuery,
-} from "../RTKService/authService";
+import { useLazyGetProfileQuery } from "../RTKService/authService";
 import {
   setAuthInitialized,
-  setGuestSignupAttempted,
+  setNeedsAuthChoice,
   setUser,
 } from "../store/authSlice";
 import { useAppDispatch, useAppSelector } from "../store/store";
+import AuthChoiceModal from "./AuthChoiceModal";
 
 interface AuthProviderProps {
   children: React.ReactNode;
 }
 
 /**
- * AuthProvider handles automatic guest authentication on first app launch.
+ * AuthProvider handles authentication on first app launch.
  *
  * Flow:
- * 1. Check if we have stored guest credentials
- * 2. If yes, try to refresh the token and get profile
- * 3. If no credentials or refresh fails, create a new guest account
- * 4. Once authenticated, fetch and store the user profile
+ * 1. Check if we have stored credentials and try to refresh token
+ * 2. If refresh succeeds, get profile and set user
+ * 3. If no credentials or refresh fails (401), show auth choice modal
+ * 4. User can choose to login or continue as guest
+ * 5. Guest account is only created when user clicks "Continue as Guest"
  */
 function AuthProvider({ children }: AuthProviderProps) {
   const dispatch = useAppDispatch();
-  const { authInitialized, guestSignupAttempted } = useAppSelector(
+  const { authInitialized, needsAuthChoice } = useAppSelector(
     (state) => state.auth,
   );
 
-  const [guestSignup] = useGuestSignupMutation();
   const [getProfile] = useLazyGetProfileQuery();
 
   const initializeAuth = useCallback(async () => {
@@ -53,34 +51,15 @@ function AuthProvider({ children }: AuthProviderProps) {
         return;
       }
     } catch (error) {
-      console.log("No active session found, will attempt guest signup", error);
+      console.log("No active session found, showing auth choice modal", error);
       clearStaleSession();
     }
 
-    // No valid session, create a new guest account
-    if (!guestSignupAttempted) {
-      console.log("Creating new guest account...");
-      dispatch(setGuestSignupAttempted(true));
-
-      try {
-        const signupResult = await guestSignup().unwrap();
-
-        if (signupResult.data?.user) {
-          dispatch(setUser(signupResult.data.user));
-          console.log(
-            "Guest account created successfully:",
-            signupResult.data.user.name,
-          );
-        }
-      } catch (error) {
-        console.error("Failed to create guest account:", error);
-        // Even if guest signup fails, we should mark auth as initialized
-        // The app can still function, just without authentication
-      }
-    }
-
+    // No valid session - show auth choice modal
+    // Don't auto-create guest account, let user choose
+    dispatch(setNeedsAuthChoice(true));
     dispatch(setAuthInitialized(true));
-  }, [dispatch, guestSignup, getProfile, guestSignupAttempted]);
+  }, [dispatch, getProfile]);
 
   useEffect(() => {
     if (!authInitialized) {
@@ -97,6 +76,15 @@ function AuthProvider({ children }: AuthProviderProps) {
           <p className="text-sm text-gray-400">Initializing...</p>
         </div>
       </div>
+    );
+  }
+
+  // Show auth choice modal if user needs to authenticate
+  if (needsAuthChoice) {
+    return (
+      <>
+        <AuthChoiceModal isOpen={needsAuthChoice} />
+      </>
     );
   }
 

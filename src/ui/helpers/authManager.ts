@@ -6,7 +6,7 @@ import type {
   QueryReturnValue,
 } from "@reduxjs/toolkit/query";
 import { baseApi, TAGS } from "../RTKService/baseApi";
-import { setTokenExpired } from "../store/authSlice";
+import { setNeedsAuthChoice, setTokenExpired } from "../store/authSlice";
 
 let inMemoryAccessToken: string | null = null;
 
@@ -130,6 +130,11 @@ const authManager = {
         if (!tokenExpired) {
           api.dispatch(setTokenExpired(true));
         }
+
+        // Clear tokens and show auth choice modal on 401
+        this.clearAccessToken();
+        this.clearGuestCredentials();
+        api.dispatch(setNeedsAuthChoice(true));
       }
       return;
     }

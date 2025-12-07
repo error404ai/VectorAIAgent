@@ -8,7 +8,11 @@ import {
   type FetchBaseQueryMeta,
 } from "@reduxjs/toolkit/query/react";
 import Global from "../config/global";
-import { setAuthInitialized, setTokenExpired } from "../store/authSlice";
+import {
+  setAuthInitialized,
+  setNeedsAuthChoice,
+  setTokenExpired,
+} from "../store/authSlice";
 import authManager from "./authManager";
 
 const REFRESH_TOKEN_ENDPOINT = "/auth/refresh-token";
@@ -209,6 +213,9 @@ class RefreshTokenManager {
             api.dispatch(setTokenExpired(true));
           }
           authManager.clearAccessToken();
+          authManager.clearGuestCredentials();
+          // Show auth choice modal when refresh fails
+          api.dispatch(setNeedsAuthChoice(true));
         }
       } catch (error) {
         console.error("Token refresh failed with retryable error:", error);
