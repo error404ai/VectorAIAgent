@@ -225,11 +225,94 @@ async def run_automation(
     else:
         message = "Automation task did not finish successfully"
 
+    # Extract rich history data from the agent
+    history_data: list[Dict[str, Any]] = []
+    urls_visited: list[str] = []
+    total_steps = 0
+    total_duration_seconds = 0.0
+    model_actions: list[Dict[str, Any]] = []
+
+    try:
+        # Get full history from agent
+        agent_history = agent.history
+        total_steps = len(agent_history.history)
+        total_duration_seconds = agent_history.total_duration_seconds()
+        urls_visited = agent_history.urls() if hasattr(agent_history, 'urls') else []
+        
+        # Serialize each step
+        for step_idx, step in enumerate(agent_history.history):
+            step_data: Dict[str, Any] = {
+                "step_number": step_idx + 1,
+                "url": step.state.url if step.state else None,
+                "title": step.state.title if step.state else None,
+            }
+            
+            # Add model output (thinking, actions)
+            if step.model_output:
+                step_data["thinking"] = getattr(step.model_output, 'thinking', None)
+                step_data["evaluation_previous_goal"] = getattr(step.model_output, 'evaluation_previous_goal', None)
+                step_data["memory"] = getattr(step.model_output, 'memory', None)
+                step_data["next_goal"] = getattr(step.model_output, 'next_goal', None)
+                
+                # Extract actions
+                if step.model_output.action:
+                    step_actions = []
+                    for action in step.model_output.action:
+                        action_dict = action.model_dump(exclude_none=True) if hasattr(action, 'model_dump') else {}
+                        step_actions.append(action_dict)
+                        model_actions.append(action_dict)
+                    step_data["actions"] = step_actions
+            
+            # Add results for each action in this step
+            if step.result:
+                step_results = []
+                for res in step.result:
+                    res_data = {
+                        "is_done": res.is_done,
+                        "success": res.success,
+                        "extracted_content": res.extracted_content,
+                        "error": res.error,
+                    }
+                    step_results.append(res_data)
+                step_data["results"] = step_results
+            
+            # Add timing metadata
+            if step.metadata:
+                step_data["duration_seconds"] = step.metadata.duration_seconds
+                step_data["step_start_time"] = step.metadata.step_start_time
+                step_data["step_end_time"] = step.metadata.step_end_time
+            
+            # Add interacted elements
+            if step.state and step.state.interacted_element:
+                interacted = []
+                for el in step.state.interacted_element:
+                    if el:
+                        interacted.append({
+                            "tag_name": getattr(el, 'tag_name', None),
+                            "xpath": getattr(el, 'xpath', None),
+                            "text": getattr(el, 'text', None),
+                        })
+                if interacted:
+                    step_data["interacted_elements"] = interacted
+            
+            history_data.append(step_data)
+            
+    except Exception as e:
+        print(f"[WARNING] Failed to extract history data: {e}")
+
     final_result: Dict[str, Any] = {
         "success": success_flag,
         "message": message,
         "details": str(result),  # type: ignore
         "is_done": automation_done,
+        "prompt": prompt,
+        "provider": provider,
+        "model": model,
+        "total_steps": total_steps,
+        "total_duration_seconds": total_duration_seconds,
+        "urls_visited": urls_visited,
+        "steps": history_data,
+        "model_actions": model_actions,
     }
 
     if final_summary and not success_flag:
@@ -245,6 +328,7 @@ async def run_automation(
                 "is_done": automation_done,
                 "is_success": automation_success,
                 "errors": error_messages,
+                "total_steps": total_steps,
             }
         ),
     )

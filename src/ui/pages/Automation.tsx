@@ -1,12 +1,14 @@
 import { Clock, OctagonPause, Star } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import type {
+  AutomationResultData,
   AutomationRuntimeOptions,
   Window,
 } from "../../../types/global-types";
 import PageTitle from "../components/PageTitle";
 import ProfileTab from "../components/ProfileTab";
 import PromptSidebar from "../components/PromptSidebar";
+import { useCreateAgentTaskMutation } from "../RTKService/agentTaskService";
 import { useAISettingsStore } from "../stores/AISettingsStore";
 import { useAutomationStore } from "../stores/AutomationStore";
 import { useBrowserSettingsStore } from "../stores/BrowserSettingsStore";
@@ -36,6 +38,9 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
   const modelConfig = configs[activeProvider];
 
   const { wallets, setWallets } = useWalletStore();
+
+  // Mutation hook to save task data to the backend
+  const [createAgentTask] = useCreateAgentTaskMutation();
 
   const profileState = getProfileState(profile);
   const [localPrompt, setLocalPrompt] = useState(profileState.prompt);
@@ -76,6 +81,46 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
   const handlePromptChange = (value: string) => {
     setLocalPrompt(value);
     setProfilePrompt(profile, value);
+  };
+
+  // Save automation task data to the backend API
+  const saveAutomationData = async (
+    prompt: string,
+    automationData: AutomationResultData | null | undefined,
+    logs: string[],
+  ) => {
+    if (!automationData) {
+      console.log("No automation data to save");
+      return;
+    }
+
+    try {
+      const taskPayload = {
+        prompt: prompt,
+        logs: logs.join("\n"),
+        steps: automationData.steps
+          ? JSON.stringify(automationData.steps)
+          : undefined,
+        provider: automationData.provider || modelConfig.provider,
+        model: automationData.model || modelConfig.model,
+        success: automationData.success,
+        message: automationData.message || automationData.final_result,
+        total_steps: automationData.total_steps,
+        total_duration_seconds: automationData.duration_seconds,
+        urls_visited: automationData.urls_visited?.join(", "),
+        errors: automationData.errors?.join("\n"),
+      };
+
+      const result = await createAgentTask(taskPayload).unwrap();
+      console.log("Successfully saved automation task data:", result);
+      addProfileLog(profile, "📊 Task data saved to backend");
+    } catch (error) {
+      console.error("Failed to save automation task data:", error);
+      addProfileLog(
+        profile,
+        `⚠️ Failed to save task data: ${(error as Error).message || "Unknown error"}`,
+      );
+    }
   };
 
   const handleSubmit = async () => {
@@ -203,7 +248,22 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
       );
 
       if (response.success) {
-        addProfileLog(profile, `Automation started: ${response.message}`);
+        addProfileLog(profile, `Automation completed: ${response.message}`);
+
+        // Save automation data to backend
+        await saveAutomationData(
+          trimmedPrompt,
+          response.automationData,
+          response.logs || [],
+        );
+
+        updateProfileTask(profile, {
+          isRunning: false,
+          result: {
+            success: true,
+            message: response.message,
+          },
+        });
       } else {
         addProfileLog(profile, `Automation failed: ${response.message}`);
         updateProfileTask(profile, {
@@ -213,6 +273,15 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
             message: response.message,
           },
         });
+
+        // Still try to save failed automation data for analysis
+        if (response.automationData) {
+          await saveAutomationData(
+            trimmedPrompt,
+            response.automationData,
+            response.logs || [],
+          );
+        }
       }
 
       if (response.logs && response.logs.length > 0) {

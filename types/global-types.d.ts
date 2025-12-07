@@ -9,6 +9,35 @@ export interface AutomationRuntimeOptions {
   fileUploadDirectory?: string;
 }
 
+export interface AutomationStepData {
+  step_number: number;
+  action_type: string;
+  action_description: string;
+  result?: string;
+  timestamp?: string;
+  duration_seconds?: number;
+  success?: boolean;
+  error?: string;
+}
+
+export interface AutomationResultData {
+  success: boolean;
+  message: string;
+  task_id?: string;
+  prompt?: string;
+  model?: string;
+  provider?: string;
+  start_time?: string;
+  end_time?: string;
+  duration_seconds?: number;
+  total_steps?: number;
+  total_actions?: number;
+  urls_visited?: string[];
+  errors?: string[];
+  steps?: AutomationStepData[];
+  final_result?: string;
+}
+
 export type IpcChannelMap = {
   selectUploadDirectory: {
     args: [];
@@ -47,6 +76,7 @@ export type IpcChannelMap = {
       message: string;
       logs?: string[];
       cdpPort?: number;
+      automationData?: AutomationResultData;
     };
   };
   stopBrowserAutomation: {

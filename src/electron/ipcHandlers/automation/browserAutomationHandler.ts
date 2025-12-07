@@ -1,7 +1,10 @@
 import { ChildProcess, exec, spawn } from "child_process";
 import { app, BrowserWindow } from "electron";
 import * as path from "path";
-import type { AutomationRuntimeOptions } from "../../../../types/global-types";
+import type {
+  AutomationResultData,
+  AutomationRuntimeOptions,
+} from "../../../../types/global-types";
 import { AIModelProvider, ModelConfig } from "../../../../types/model.js";
 import AISettingsService from "../../services/AISettingsService.js";
 import BrowserSettingsService from "../../services/BrowserSettingsService.js";
@@ -759,6 +762,9 @@ export function registerBrowserAutomationHandlers() {
           console.error(`Python stderr for task ${taskId}: ${error}`);
         };
 
+        // Variable to capture the final result JSON from Python output
+        let automationResultData: AutomationResultData | undefined = undefined;
+
         // Send logs back to the renderer process
         if (pythonProcess.stdout) {
           pythonProcess.stdout.on("data", (data: Buffer) => {
@@ -766,6 +772,22 @@ export function registerBrowserAutomationHandlers() {
             logs.push(logMsg);
             console.log(`Python stdout for task ${taskId}: ${logMsg}`);
             logHandler(logMsg);
+
+            // Parse the final result JSON if present
+            const completeMatch = logMsg.match(
+              /\[COMPLETE\] Final result:\s*(.+)$/,
+            );
+            if (completeMatch) {
+              try {
+                automationResultData = JSON.parse(completeMatch[1]);
+                console.log(`Parsed automation result data for task ${taskId}`);
+              } catch (parseErr) {
+                console.error(
+                  `Failed to parse automation result for task ${taskId}:`,
+                  parseErr,
+                );
+              }
+            }
           });
         }
 
@@ -794,6 +816,7 @@ export function registerBrowserAutomationHandlers() {
             success: false,
             message: `Automation script for task ${taskId} exited with code ${exitCode}`,
             logs: logs,
+            automationData: automationResultData,
           };
         }
 
@@ -801,6 +824,7 @@ export function registerBrowserAutomationHandlers() {
           success: true,
           message: `Automation for task ${taskId} completed successfully`,
           logs: logs,
+          automationData: automationResultData,
         };
       } catch (error: unknown) {
         console.error(
@@ -825,6 +849,7 @@ export function registerBrowserAutomationHandlers() {
           success: false,
           message: `Automation failed for task ${taskId}: ${(error as Error).message}`,
           logs: logs,
+          automationData: undefined,
         };
       }
     },
