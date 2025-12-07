@@ -3,7 +3,6 @@ import authManager from "../helpers/authManager";
 import {
   useGuestSignupMutation,
   useLazyGetProfileQuery,
-  useRefreshTokenMutation,
 } from "../RTKService/authService";
 import {
   setAuthInitialized,
@@ -32,51 +31,33 @@ function AuthProvider({ children }: AuthProviderProps) {
   );
 
   const [guestSignup] = useGuestSignupMutation();
-  const [refreshToken] = useRefreshTokenMutation();
   const [getProfile] = useLazyGetProfileQuery();
 
   const initializeAuth = useCallback(async () => {
-    // Check if we have existing guest credentials
-    const existingCredentials = authManager.getGuestCredentials();
+    const clearStaleSession = () => {
+      authManager.clearAccessToken();
+      authManager.clearGuestCredentials();
+    };
 
-    if (existingCredentials) {
-      console.log(
-        "Found existing guest credentials, attempting to refresh token...",
-      );
-      try {
-        // Try to refresh the access token using stored refresh token
-        const refreshResult = await refreshToken({
-          refresh_token: existingCredentials.refreshToken,
-        }).unwrap();
-
-        if (refreshResult.data?.accessToken) {
-          authManager.saveAccessToken(refreshResult.data.accessToken);
-
-          // Fetch the user profile
-          const profileResult = await getProfile().unwrap();
-          if (profileResult.data) {
-            dispatch(setUser(profileResult.data));
-            console.log(
-              "Successfully restored session for user:",
-              profileResult.data.name,
-            );
-          }
-
-          dispatch(setAuthInitialized(true));
-          return;
-        }
-      } catch (error) {
+    // Try to restore an existing session using refresh-token + /auth/me flow
+    // RefreshTokenManager inside baseApi will retry on 401 using the cookie
+    try {
+      const profileResult = await getProfile().unwrap();
+      if (profileResult?.data) {
+        dispatch(setUser(profileResult.data));
+        dispatch(setAuthInitialized(true));
         console.log(
-          "Failed to refresh token, will create new guest account:",
-          error,
+          "Restored session from refresh token for user:",
+          profileResult.data.name,
         );
-        // Clear invalid credentials
-        authManager.clearGuestCredentials();
-        authManager.clearAccessToken();
+        return;
       }
+    } catch (error) {
+      console.log("No active session found, will attempt guest signup", error);
+      clearStaleSession();
     }
 
-    // No valid credentials, create a new guest account
+    // No valid session, create a new guest account
     if (!guestSignupAttempted) {
       console.log("Creating new guest account...");
       dispatch(setGuestSignupAttempted(true));
@@ -99,7 +80,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
 
     dispatch(setAuthInitialized(true));
-  }, [dispatch, guestSignup, refreshToken, getProfile, guestSignupAttempted]);
+  }, [dispatch, guestSignup, getProfile, guestSignupAttempted]);
 
   useEffect(() => {
     if (!authInitialized) {

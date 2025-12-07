@@ -1,5 +1,5 @@
 import authManager from "../helpers/authManager";
-import { logout } from "../store/authSlice";
+import { logout, setUser } from "../store/authSlice";
 import type {
   AuthResponse,
   LoginRequest,
@@ -59,6 +59,16 @@ const authApi = baseApi.injectEndpoints({
         url: "/auth/me",
         method: "GET",
       }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          if (data?.data) {
+            dispatch(setUser(data.data));
+          }
+        } catch {
+          // ignore profile fetch errors; refresh manager will handle retries/401s
+        }
+      },
       providesTags: [TAGS.PROFILE, TAGS.ACCOUNT_INFO],
     }),
 

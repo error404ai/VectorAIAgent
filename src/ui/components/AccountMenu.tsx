@@ -47,6 +47,11 @@ function AccountMenu({ onUpgradeClick }: AccountMenuProps) {
     );
   }
 
+  console.log({
+    isAuthenticated,
+    user,
+  });
+
   if (!isAuthenticated || !user) {
     return null;
   }

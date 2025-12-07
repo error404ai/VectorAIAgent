@@ -131,6 +131,15 @@ const authManager = {
           api.dispatch(setTokenExpired(true));
         }
       }
+      return;
+    }
+
+    // Clear tokenExpired flag once calls start succeeding again
+    if (this.getAccessToken()) {
+      const tokenExpired = api.getState().auth?.tokenExpired;
+      if (tokenExpired) {
+        api.dispatch(setTokenExpired(false));
+      }
     }
   },
 };
