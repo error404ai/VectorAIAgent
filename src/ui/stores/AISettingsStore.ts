@@ -26,10 +26,10 @@ export const defaultConfigs: Record<
   },
   deepseek: {
     provider: "deepseek",
-    model: "deepseek-chat",
+    model: "deepseek-reasoner",
     baseUrl: "https://api.deepseek.com/v1",
     temperature: 0.7,
-    maxTokens: 4096,
+    maxTokens: 32768,
   },
   openrouter: {
     provider: "openrouter",

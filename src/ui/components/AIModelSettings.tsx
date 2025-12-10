@@ -88,6 +88,7 @@ const modelOptions: ModelOption[] = [
     description: "DeepSeek models (requires API key)",
     models: [
       { id: "deepseek-chat", name: "DeepSeek Chat", useVision: false },
+      { id: "deepseek-reasoner", name: "DeepSeek Reasoner", useVision: false },
       { id: "deepseek-coder", name: "DeepSeek Coder", useVision: false },
       { id: "deepseek-v2", name: "DeepSeek V2", useVision: false },
     ],
