@@ -9,6 +9,7 @@ import PageTitle from "../components/PageTitle";
 import ProfileTab from "../components/ProfileTab";
 import PromptSidebar from "../components/PromptSidebar";
 import { useCreateAgentTaskMutation } from "../RTKService/agentTaskService";
+import { useSearchAiRulesMutation } from "../RTKService/aiRuleService";
 import { useAISettingsStore } from "../stores/AISettingsStore";
 import { useAutomationStore } from "../stores/AutomationStore";
 import { useBrowserSettingsStore } from "../stores/BrowserSettingsStore";
@@ -31,6 +32,10 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
     setProfilePrompt,
     startProfileTask,
     updateProfileTask,
+    setProfileAttachedRule,
+    setProfileRetrievingRule,
+    setProfileRuleError,
+    clearProfileAttachedRule,
   } = useAutomationStore();
 
   // Get the active model configuration from the store
@@ -41,6 +46,9 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
 
   // Mutation hook to save task data to the backend
   const [createAgentTask] = useCreateAgentTaskMutation();
+
+  // Mutation hook to search AI rules
+  const [searchAiRules] = useSearchAiRulesMutation();
 
   const profileState = getProfileState(profile);
   const [localPrompt, setLocalPrompt] = useState(profileState.prompt);
@@ -140,6 +148,65 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
         "ERROR: Please enter a prompt before starting automation",
       );
       return;
+    }
+
+    const RULE_SIMILARITY_THRESHOLD = parseFloat(
+      import.meta.env.VITE_RULE_SIMILARITY_THRESHOLD || "0.5",
+    );
+
+    clearProfileAttachedRule(profile);
+
+    let enhancedPrompt = trimmedPrompt;
+    try {
+      setProfileRetrievingRule(profile, true);
+      addProfileLog(profile, "🔍 Searching for relevant AI rules...");
+
+      const ruleResponse = await searchAiRules({
+        prompt: trimmedPrompt,
+        limit: 1,
+      }).unwrap();
+
+      if (ruleResponse.data && ruleResponse.data.length > 0) {
+        const topRule = ruleResponse.data[0];
+
+        if (
+          topRule.similarity_score &&
+          topRule.similarity_score >= RULE_SIMILARITY_THRESHOLD
+        ) {
+          setProfileAttachedRule(profile, topRule);
+          addProfileLog(
+            profile,
+            `✅ Found matching rule: "${topRule.name}" (similarity: ${(topRule.similarity_score * 100).toFixed(1)}%)`,
+          );
+          addProfileLog(profile, `📋 Rule description: ${topRule.description}`);
+
+          // Enhance the prompt with the rule
+          enhancedPrompt = `${topRule.rule}\n\nOriginal task: ${trimmedPrompt}`;
+          addProfileLog(profile, "🔗 Rule attached to automation prompt");
+        } else {
+          addProfileLog(
+            profile,
+            `⚠️ Found rule but similarity too low: ${(topRule.similarity_score || 0) * 100}% < ${RULE_SIMILARITY_THRESHOLD * 100}%`,
+          );
+          setProfileRuleError(
+            profile,
+            "No matching rule found with sufficient similarity",
+          );
+        }
+      } else {
+        addProfileLog(profile, "ℹ️ No matching rules found");
+        setProfileRuleError(profile, "No rules found");
+      }
+    } catch (error) {
+      console.error("Failed to retrieve AI rules:", error);
+      const errorMessage = (error as Error).message || "Unknown error";
+      addProfileLog(
+        profile,
+        `⚠️ Failed to retrieve AI rules: ${errorMessage}. Proceeding without rule.`,
+      );
+      setProfileRuleError(profile, errorMessage);
+    } finally {
+      setProfileRetrievingRule(profile, false);
     }
 
     // Check if API key is required and present for the active provider
@@ -250,7 +317,7 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
       ).electronAPI.runBrowserAutomationTask(
         taskId,
         profile,
-        trimmedPrompt,
+        enhancedPrompt, // Use enhanced prompt with rule if attached
         modelConfig.apiKey ? modelConfig : undefined,
         Object.keys(runtimeOptions).length ? runtimeOptions : undefined,
       );
@@ -339,7 +406,7 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
   const isRunning = profileState.currentTask?.isRunning || false;
 
   return (
-    <div className="flex min-w-0 flex-grow flex-col gap-5 overflow-auto">
+    <div className="flex min-w-0 grow flex-col gap-5 overflow-auto">
       {profileState.logs.length > 0 && (
         <div className="terminal-scrollbar max-h-[calc(100vh-270px)] overflow-auto border border-white/10 bg-black/30 p-4 font-mono text-sm backdrop-blur-sm">
           <div className="mb-2 flex items-center justify-between border-b border-white/10 pb-2">
@@ -377,6 +444,64 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
         </div>
       )}
 
+      {/* AI Rule status display */}
+      {(profileState.isRetrievingRule ||
+        profileState.attachedRule ||
+        profileState.ruleError) && (
+        <div className="border border-blue-500/30 bg-blue-500/10 p-4 text-sm backdrop-blur-sm">
+          {profileState.isRetrievingRule && (
+            <div className="flex items-center gap-2 text-blue-300">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-transparent border-t-blue-500"></div>
+              <span>Retrieving AI rules...</span>
+            </div>
+          )}
+
+          {!profileState.isRetrievingRule && profileState.attachedRule && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-green-400">✓</span>
+                <span className="font-semibold text-white">Attached Rule:</span>
+                <span className="text-blue-200">
+                  {profileState.attachedRule.name}
+                </span>
+              </div>
+              <div className="text-white/70">
+                <span className="text-white/50">Description:</span>{" "}
+                {profileState.attachedRule.description}
+              </div>
+              {profileState.attachedRule.similarity_score && (
+                <div className="text-xs text-white/50">
+                  Similarity score:{" "}
+                  {(profileState.attachedRule.similarity_score * 100).toFixed(
+                    1,
+                  )}
+                  %
+                </div>
+              )}
+              <details className="mt-2">
+                <summary className="cursor-pointer text-xs text-white/60 hover:text-white/80">
+                  View rule details
+                </summary>
+                <div className="mt-2 max-h-32 overflow-auto border-l-2 border-blue-500/30 bg-black/20 p-2 text-xs text-white/70">
+                  {profileState.attachedRule.rule}
+                </div>
+              </details>
+            </div>
+          )}
+
+          {!profileState.isRetrievingRule &&
+            !profileState.attachedRule &&
+            profileState.ruleError && (
+              <div className="flex items-center gap-2 text-yellow-300">
+                <span>⚠</span>
+                <span>
+                  No matching AI rule found - proceeding with original prompt
+                </span>
+              </div>
+            )}
+        </div>
+      )}
+
       {/* Form for entering prompt */}
       <form
         onSubmit={(e) => {
@@ -387,7 +512,7 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
         }}
         className="mt-auto flex border border-white/20 bg-black/40 backdrop-blur-sm"
       >
-        <div className="relative flex-grow">
+        <div className="relative grow">
           <textarea
             rows={2}
             value={localPrompt}
@@ -667,7 +792,7 @@ function AutomationTerminalPage() {
             </span>
           </div>
         </PageTitle>
-        <div className="flex flex-grow items-center justify-center">
+        <div className="flex grow items-center justify-center">
           <div className="text-center">
             <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-2 border-transparent border-t-white/70"></div>
             <span className="text-white/70">Loading profiles...</span>
@@ -757,7 +882,7 @@ function AutomationTerminalPage() {
         ref={toggleRef}
         className="absolute top-0 right-0 z-20 flex h-full w-12 flex-col border-l border-white/5 bg-black/20 backdrop-blur-sm"
       >
-        <div className="flex flex-grow flex-col gap-2">
+        <div className="flex grow flex-col gap-2">
           <button
             onClick={() => {
               if (activeTab === "history") {

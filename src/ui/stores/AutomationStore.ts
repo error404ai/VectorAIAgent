@@ -4,6 +4,7 @@ import type {
   AutomationRuntimeOptions,
   Window,
 } from "../../../types/global-types";
+import type { AiRule } from "../types/aiRule";
 import { useAISettingsStore } from "./AISettingsStore";
 import { useWalletStore } from "./WalletStore";
 
@@ -62,6 +63,9 @@ export interface ProfileAutomationState {
     logs?: string[];
   } | null;
   isRunning: boolean;
+  attachedRule: AiRule | null;
+  isRetrievingRule: boolean;
+  ruleError: string | null;
 }
 
 export interface AutomationState {
@@ -184,6 +188,12 @@ export interface AutomationState {
   getActiveScheduledTasks: () => ScheduledTask[];
   executeScheduledTask: (taskId: string) => Promise<void>;
   checkAndExecuteScheduledTasks: () => void;
+
+  // AI Rule methods
+  setProfileAttachedRule: (profile: string, rule: AiRule | null) => void;
+  setProfileRetrievingRule: (profile: string, isRetrieving: boolean) => void;
+  setProfileRuleError: (profile: string, error: string | null) => void;
+  clearProfileAttachedRule: (profile: string) => void;
   stopAllScheduledTasks: () => void;
   restoreScheduledTaskTimers: () => void;
 }
@@ -308,6 +318,9 @@ export const useAutomationStore = create<AutomationState>()(
                 logs: [],
                 result: null,
                 isRunning: false,
+                attachedRule: null,
+                isRetrievingRule: false,
+                ruleError: null,
               },
             },
           }));
@@ -317,6 +330,9 @@ export const useAutomationStore = create<AutomationState>()(
             logs: [],
             result: null,
             isRunning: false,
+            attachedRule: null,
+            isRetrievingRule: false,
+            ruleError: null,
           };
         }
         return state.profileStates[profile];
@@ -400,6 +416,9 @@ export const useAutomationStore = create<AutomationState>()(
                   logs: [log],
                   result: null,
                   isRunning: false,
+                  attachedRule: null,
+                  isRetrievingRule: false,
+                  ruleError: null,
                 },
               },
             };
@@ -440,6 +459,9 @@ export const useAutomationStore = create<AutomationState>()(
                   logs: logs,
                   result: null,
                   isRunning: false,
+                  attachedRule: null,
+                  isRetrievingRule: false,
+                  ruleError: null,
                 },
               },
             };
@@ -1323,6 +1345,57 @@ export const useAutomationStore = create<AutomationState>()(
             }, 100);
           }
         });
+      },
+
+      // AI Rule methods
+      setProfileAttachedRule: (profile: string, rule: AiRule | null) => {
+        set((state) => ({
+          profileStates: {
+            ...state.profileStates,
+            [profile]: {
+              ...state.profileStates[profile],
+              attachedRule: rule,
+            },
+          },
+        }));
+      },
+
+      setProfileRetrievingRule: (profile: string, isRetrieving: boolean) => {
+        set((state) => ({
+          profileStates: {
+            ...state.profileStates,
+            [profile]: {
+              ...state.profileStates[profile],
+              isRetrievingRule: isRetrieving,
+            },
+          },
+        }));
+      },
+
+      setProfileRuleError: (profile: string, error: string | null) => {
+        set((state) => ({
+          profileStates: {
+            ...state.profileStates,
+            [profile]: {
+              ...state.profileStates[profile],
+              ruleError: error,
+            },
+          },
+        }));
+      },
+
+      clearProfileAttachedRule: (profile: string) => {
+        set((state) => ({
+          profileStates: {
+            ...state.profileStates,
+            [profile]: {
+              ...state.profileStates[profile],
+              attachedRule: null,
+              isRetrievingRule: false,
+              ruleError: null,
+            },
+          },
+        }));
       },
     }),
     {
