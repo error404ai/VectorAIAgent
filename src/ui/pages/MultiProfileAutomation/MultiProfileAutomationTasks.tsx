@@ -581,6 +581,14 @@ function MultiProfileAutomationTasks() {
             ⚠️ No API key configured
           </span>
         )}
+        {selectedProfiles.some(
+          (profile) => getProfileState(profile).attachedRule,
+        ) && (
+          <div className="flex items-center gap-1 rounded bg-blue-500/20 px-2 py-0.5 text-xs text-blue-300">
+            <span>📋</span>
+            <span>AI Rule</span>
+          </div>
+        )}
       </PageTitle>
 
       <div className="max-h-[calc(100vh-140px)] flex-1 overflow-auto p-4">
