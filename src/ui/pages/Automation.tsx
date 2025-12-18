@@ -34,7 +34,6 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
     startProfileTask,
     updateProfileTask,
     setProfileAttachedRule,
-    setProfileRetrievingRule,
     setProfileRuleError,
     clearProfileAttachedRule,
   } = useAutomationStore();
@@ -49,7 +48,8 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
   const [createAgentTask] = useCreateAgentTaskMutation();
 
   // Mutation hook to search AI rules
-  const [searchAiRules] = useSearchAiRulesMutation();
+  const [searchAiRules, { isLoading: isSearchingRules }] =
+    useSearchAiRulesMutation();
 
   // Mutation hook to enhance prompt
   const [enhancePrompt, { isLoading }] = useEnhancePromptMutation();
@@ -176,7 +176,6 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
 
     let enhancedPrompt = trimmedPrompt;
     try {
-      setProfileRetrievingRule(profile, true);
       addProfileLog(profile, "🔍 Searching for relevant AI rules...");
 
       const ruleResponse = await searchAiRules({
@@ -223,8 +222,6 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
         `⚠️ Failed to retrieve AI rules: ${errorMessage}. Proceeding without rule.`,
       );
       setProfileRuleError(profile, errorMessage);
-    } finally {
-      setProfileRetrievingRule(profile, false);
     }
 
     // Check if API key is required and present for the active provider
@@ -465,18 +462,18 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
       )}
 
       {/* AI Rule status display */}
-      {(profileState.isRetrievingRule ||
+      {(isSearchingRules ||
         profileState.attachedRule ||
         profileState.ruleError) && (
         <div className="border border-blue-500/30 bg-blue-500/10 p-4 text-sm backdrop-blur-sm">
-          {profileState.isRetrievingRule && (
+          {isSearchingRules && (
             <div className="flex items-center gap-2 text-blue-300">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-transparent border-t-blue-500"></div>
               <span>Retrieving AI rules...</span>
             </div>
           )}
 
-          {!profileState.isRetrievingRule && profileState.attachedRule && (
+          {!isSearchingRules && profileState.attachedRule && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="text-green-400">✓</span>
@@ -509,7 +506,7 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
             </div>
           )}
 
-          {!profileState.isRetrievingRule &&
+          {!isSearchingRules &&
             !profileState.attachedRule &&
             profileState.ruleError && (
               <div className="flex items-center gap-2 text-yellow-300">
@@ -563,7 +560,7 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
         </div>
 
         <div className="flex">
-          {isRunning ? (
+          {isRunning || isSearchingRules ? (
             <button
               type="button"
               onClick={handleStopTask}

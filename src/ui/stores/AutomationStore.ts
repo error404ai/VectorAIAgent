@@ -64,7 +64,6 @@ export interface ProfileAutomationState {
   } | null;
   isRunning: boolean;
   attachedRule: AiRule | null;
-  isRetrievingRule: boolean;
   ruleError: string | null;
 }
 
@@ -191,7 +190,6 @@ export interface AutomationState {
 
   // AI Rule methods
   setProfileAttachedRule: (profile: string, rule: AiRule | null) => void;
-  setProfileRetrievingRule: (profile: string, isRetrieving: boolean) => void;
   setProfileRuleError: (profile: string, error: string | null) => void;
   clearProfileAttachedRule: (profile: string) => void;
   stopAllScheduledTasks: () => void;
@@ -319,7 +317,6 @@ export const useAutomationStore = create<AutomationState>()(
                 result: null,
                 isRunning: false,
                 attachedRule: null,
-                isRetrievingRule: false,
                 ruleError: null,
               },
             },
@@ -331,7 +328,6 @@ export const useAutomationStore = create<AutomationState>()(
             result: null,
             isRunning: false,
             attachedRule: null,
-            isRetrievingRule: false,
             ruleError: null,
           };
         }
@@ -424,7 +420,6 @@ export const useAutomationStore = create<AutomationState>()(
                   result: null,
                   isRunning: false,
                   attachedRule: null,
-                  isRetrievingRule: false,
                   ruleError: null,
                 },
               },
@@ -467,7 +462,6 @@ export const useAutomationStore = create<AutomationState>()(
                   result: null,
                   isRunning: false,
                   attachedRule: null,
-                  isRetrievingRule: false,
                   ruleError: null,
                 },
               },
@@ -1367,18 +1361,6 @@ export const useAutomationStore = create<AutomationState>()(
         }));
       },
 
-      setProfileRetrievingRule: (profile: string, isRetrieving: boolean) => {
-        set((state) => ({
-          profileStates: {
-            ...state.profileStates,
-            [profile]: {
-              ...state.profileStates[profile],
-              isRetrievingRule: isRetrieving,
-            },
-          },
-        }));
-      },
-
       setProfileRuleError: (profile: string, error: string | null) => {
         set((state) => ({
           profileStates: {
@@ -1398,7 +1380,6 @@ export const useAutomationStore = create<AutomationState>()(
             [profile]: {
               ...state.profileStates[profile],
               attachedRule: null,
-              isRetrievingRule: false,
               ruleError: null,
             },
           },
