@@ -1,4 +1,4 @@
-import { Clock, OctagonPause, Star } from "lucide-react";
+import { Clock, OctagonPause, Star, Wand2 } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import type {
   AutomationResultData,
@@ -547,6 +547,14 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
             }
             className="w-full min-w-0 resize-none border-none bg-transparent px-4 py-3 text-white placeholder-white/50 focus:outline-none disabled:opacity-60"
           />
+          <button
+            type="button"
+            onClick={handleEnhancePrompt}
+            disabled={!localPrompt.trim()}
+            className="absolute right-0 bg-blue-600/20 px-2 py-1 text-xs text-white transition-colors hover:bg-blue-600/30 disabled:opacity-40"
+          >
+            <Wand2 size={16} />
+          </button>
           <div className="absolute right-3 bottom-2 text-xs text-white/40">
             {localPrompt.length} chars
           </div>
@@ -565,23 +573,13 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
               <OctagonPause color="red" />
             </button>
           ) : (
-            <>
-              <button
-                type="button"
-                onClick={handleEnhancePrompt}
-                disabled={!localPrompt.trim()}
-                className="border-l border-white/20 bg-blue-500/10 px-6 font-medium text-white transition-colors hover:bg-blue-500/20 disabled:bg-white/5 disabled:text-white/30"
-              >
-                Enhance
-              </button>
-              <button
-                type="submit"
-                disabled={!canStart}
-                className="border-l border-white/20 bg-white/10 px-8 font-medium text-white transition-colors hover:bg-white/20 disabled:bg-white/5 disabled:text-white/30"
-              >
-                Run
-              </button>
-            </>
+            <button
+              type="submit"
+              disabled={!canStart}
+              className="border-l border-white/20 bg-white/10 px-8 font-medium text-white transition-colors hover:bg-white/20 disabled:bg-white/5 disabled:text-white/30"
+            >
+              Run
+            </button>
           )}
         </div>
       </form>
