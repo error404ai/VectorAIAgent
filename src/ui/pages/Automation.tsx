@@ -97,18 +97,14 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
 
   const handleEnhancePrompt = async () => {
     if (!localPrompt.trim()) {
-      addProfileLog(profile, "ERROR: Please enter a prompt before enhancing");
       return;
     }
 
     try {
-      addProfileLog(profile, "🔧 Enhancing prompt...");
       const response = await enhancePrompt({ prompt: localPrompt }).unwrap();
       setLocalPrompt(response.enhancedPrompt);
       setProfilePrompt(profile, response.enhancedPrompt);
-      addProfileLog(profile, "✅ Prompt enhanced successfully");
     } catch (error) {
-      addProfileLog(profile, "❌ Failed to enhance prompt");
       console.error("Enhance prompt error:", error);
     }
   };
