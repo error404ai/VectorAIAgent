@@ -4,6 +4,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Modal from "../../components/Modal";
 import PageTitle from "../../components/PageTitle";
+import { useSearchAiRulesMutation } from "../../RTKService/aiRuleService";
 import { useEnhancePromptMutation } from "../../RTKService/promptService";
 import { useAISettingsStore } from "../../stores/AISettingsStore";
 import {
@@ -82,6 +83,8 @@ function MultiProfileAutomationTasks() {
     cancelScheduledStartsForProfiles,
     isProfileQueued,
     promptHistory,
+    setProfileAttachedRule,
+    clearProfileAttachedRule,
   } = useAutomationStore();
 
   // helper to know if any running or queued tasks exist globally
@@ -95,6 +98,10 @@ function MultiProfileAutomationTasks() {
   // Mutation hook to enhance prompt
   const [enhancePrompt, { isLoading: isEnhancingLoading }] =
     useEnhancePromptMutation();
+
+  // Mutation hook to search AI rules
+  const [searchAiRules, { isLoading: isSearchingRules }] =
+    useSearchAiRulesMutation();
 
   // Use react-datepicker directly for picking date/time. The package must be
   // installed in the project for this to work.
@@ -247,15 +254,78 @@ function MultiProfileAutomationTasks() {
       return;
     }
 
+    const RULE_SIMILARITY_THRESHOLD = parseFloat(
+      import.meta.env.VITE_RULE_SIMILARITY_THRESHOLD || "0.5",
+    );
+
+    // Clear any previous attached rules for target profiles
+    targetProfiles.forEach((profile) => {
+      clearProfileAttachedRule(profile);
+    });
+
+    let enhancedPrompt = localPrompt.trim();
+    try {
+      setOperationStatus({
+        status: "saving",
+        message: "Searching for AI rules...",
+      });
+
+      const ruleResponse = await searchAiRules({
+        prompt: localPrompt.trim(),
+        limit: 1,
+      }).unwrap();
+
+      if (ruleResponse.data && ruleResponse.data.length > 0) {
+        const topRule = ruleResponse.data[0];
+
+        if (
+          topRule.similarity_score &&
+          topRule.similarity_score >= RULE_SIMILARITY_THRESHOLD
+        ) {
+          // Attach the rule to all target profiles
+          targetProfiles.forEach((profile) => {
+            setProfileAttachedRule(profile, topRule);
+          });
+
+          setOperationStatus({
+            status: "saving",
+            message: `Found matching rule: "${topRule.name}" (${(topRule.similarity_score * 100).toFixed(1)}% similarity)`,
+          });
+
+          // Enhance the prompt with the rule
+          enhancedPrompt = `${topRule.rule}\n\nOriginal task: ${localPrompt.trim()}`;
+        } else {
+          setOperationStatus({
+            status: "saving",
+            message: `Rule found but similarity too low (${(topRule.similarity_score || 0) * 100}%)`,
+          });
+        }
+      } else {
+        setOperationStatus({
+          status: "saving",
+          message: "No matching AI rules found",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to retrieve AI rules:", error);
+      setOperationStatus({
+        status: "saving",
+        message: "Failed to search AI rules, proceeding without rules",
+      });
+    }
+
     try {
       setIsStarting(true);
-      setOperationStatus({ status: "saving" });
+      setOperationStatus({
+        status: "saving",
+        message: "Starting automation...",
+      });
 
       // convert seconds -> ms and pass to store
       const delayMs = Math.max(0, Math.round(delaySeconds * 1000));
       await startTasksForMultipleProfiles(
         targetProfiles,
-        localPrompt.trim(),
+        enhancedPrompt,
         delayMs,
       );
 
@@ -576,7 +646,7 @@ function MultiProfileAutomationTasks() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              if (!isStarting) {
+              if (!isStarting && !isSearchingRules) {
                 handleStartTasks();
               }
             }}
@@ -588,7 +658,7 @@ function MultiProfileAutomationTasks() {
                 onChange={(e) => setLocalPrompt(e.target.value)}
                 className="h-20 w-full resize-none border border-white/20 bg-black/40 p-2 pr-10 text-sm text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
                 placeholder="Enter your automation prompt here (e.g. 'Post a tweet about my latest project')"
-                disabled={isStarting}
+                disabled={isStarting || isSearchingRules}
               />
               <button
                 type="button"
@@ -638,12 +708,18 @@ function MultiProfileAutomationTasks() {
                 type="submit"
                 disabled={
                   isStarting ||
+                  isSearchingRules ||
                   !localPrompt.trim() ||
                   selectedProfiles.length === 0
                 }
                 className="flex items-center gap-2 bg-blue-600 px-2 py-1 text-sm text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {isStarting ? (
+                {isSearchingRules ? (
+                  <>
+                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-transparent border-t-blue-300"></div>
+                    <span className="text-sm">Searching Rules...</span>
+                  </>
+                ) : isStarting ? (
                   <>
                     <div className="h-3 w-3 animate-spin rounded-full border-2 border-transparent border-t-white"></div>
                     <span className="text-sm">Starting...</span>
