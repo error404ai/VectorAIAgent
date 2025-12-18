@@ -391,8 +391,15 @@ export const useAutomationStore = create<AutomationState>()(
               [profile]: {
                 ...profileState,
                 currentTask: { ...profileState.currentTask, ...updates },
-                isRunning: updates.isRunning ?? profileState.isRunning,
-                result: updates.result ?? profileState.result,
+                isRunning: Object.prototype.hasOwnProperty.call(
+                  updates,
+                  "isRunning",
+                )
+                  ? (updates.isRunning as boolean)
+                  : profileState.isRunning,
+                result: Object.prototype.hasOwnProperty.call(updates, "result")
+                  ? (updates.result as typeof profileState.result)
+                  : profileState.result,
               },
             },
           };
