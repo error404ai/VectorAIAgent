@@ -10,6 +10,7 @@ import ProfileTab from "../components/ProfileTab";
 import PromptSidebar from "../components/PromptSidebar";
 import { useCreateAgentTaskMutation } from "../RTKService/agentTaskService";
 import { useSearchAiRulesMutation } from "../RTKService/aiRuleService";
+import { useEnhancePromptMutation } from "../RTKService/promptService";
 import { useAISettingsStore } from "../stores/AISettingsStore";
 import { useAutomationStore } from "../stores/AutomationStore";
 import { useBrowserSettingsStore } from "../stores/BrowserSettingsStore";
@@ -50,6 +51,9 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
   // Mutation hook to search AI rules
   const [searchAiRules] = useSearchAiRulesMutation();
 
+  // Mutation hook to enhance prompt
+  const [enhancePrompt] = useEnhancePromptMutation();
+
   const profileState = getProfileState(profile);
   const [localPrompt, setLocalPrompt] = useState(profileState.prompt);
 
@@ -89,6 +93,24 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
   const handlePromptChange = (value: string) => {
     setLocalPrompt(value);
     setProfilePrompt(profile, value);
+  };
+
+  const handleEnhancePrompt = async () => {
+    if (!localPrompt.trim()) {
+      addProfileLog(profile, "ERROR: Please enter a prompt before enhancing");
+      return;
+    }
+
+    try {
+      addProfileLog(profile, "🔧 Enhancing prompt...");
+      const response = await enhancePrompt({ prompt: localPrompt }).unwrap();
+      setLocalPrompt(response.enhancedPrompt);
+      setProfilePrompt(profile, response.enhancedPrompt);
+      addProfileLog(profile, "✅ Prompt enhanced successfully");
+    } catch (error) {
+      addProfileLog(profile, "❌ Failed to enhance prompt");
+      console.error("Enhance prompt error:", error);
+    }
   };
 
   // Save automation task data to the backend API
@@ -543,13 +565,23 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
               <OctagonPause color="red" />
             </button>
           ) : (
-            <button
-              type="submit"
-              disabled={!canStart}
-              className="border-l border-white/20 bg-white/10 px-8 font-medium text-white transition-colors hover:bg-white/20 disabled:bg-white/5 disabled:text-white/30"
-            >
-              Run
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={handleEnhancePrompt}
+                disabled={!localPrompt.trim()}
+                className="border-l border-white/20 bg-blue-500/10 px-6 font-medium text-white transition-colors hover:bg-blue-500/20 disabled:bg-white/5 disabled:text-white/30"
+              >
+                Enhance
+              </button>
+              <button
+                type="submit"
+                disabled={!canStart}
+                className="border-l border-white/20 bg-white/10 px-8 font-medium text-white transition-colors hover:bg-white/20 disabled:bg-white/5 disabled:text-white/30"
+              >
+                Run
+              </button>
+            </>
           )}
         </div>
       </form>

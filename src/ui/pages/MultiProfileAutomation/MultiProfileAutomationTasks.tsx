@@ -4,6 +4,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Modal from "../../components/Modal";
 import PageTitle from "../../components/PageTitle";
+import { useEnhancePromptMutation } from "../../RTKService/promptService";
 import { useAISettingsStore } from "../../stores/AISettingsStore";
 import {
   useAutomationStore,
@@ -90,6 +91,9 @@ function MultiProfileAutomationTasks() {
 
   const { activeProvider, configs } = useAISettingsStore();
   const modelConfig = configs[activeProvider];
+
+  // Mutation hook to enhance prompt
+  const [enhancePrompt] = useEnhancePromptMutation();
 
   // Use react-datepicker directly for picking date/time. The package must be
   // installed in the project for this to work.
@@ -190,6 +194,35 @@ function MultiProfileAutomationTasks() {
       setSelectedProfiles([]);
     } else {
       setSelectedProfiles([...allAvailableProfiles]);
+    }
+  };
+
+  const handleEnhancePrompt = async () => {
+    if (!localPrompt.trim()) {
+      setOperationStatus({
+        status: "error",
+        message: "Please enter a prompt before enhancing",
+      });
+      setTimeout(() => setOperationStatus({ status: "idle" }), 3000);
+      return;
+    }
+
+    try {
+      setOperationStatus({ status: "saving", message: "Enhancing prompt..." });
+      const response = await enhancePrompt({ prompt: localPrompt }).unwrap();
+      setLocalPrompt(response.enhancedPrompt);
+      setOperationStatus({
+        status: "saved",
+        message: "Prompt enhanced successfully",
+      });
+      setTimeout(() => setOperationStatus({ status: "idle" }), 3000);
+    } catch (error) {
+      setOperationStatus({
+        status: "error",
+        message: "Failed to enhance prompt",
+      });
+      setTimeout(() => setOperationStatus({ status: "idle" }), 3000);
+      console.error("Enhance prompt error:", error);
     }
   };
 
@@ -601,6 +634,24 @@ function MultiProfileAutomationTasks() {
                   <span className="text-sm">Stop All</span>
                 </button>
               )}
+
+              <button
+                type="button"
+                onClick={handleEnhancePrompt}
+                disabled={
+                  !localPrompt.trim() || operationStatus.status === "saving"
+                }
+                className="bg-green-600 px-2 py-1 text-sm text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {operationStatus.status === "saving" ? (
+                  <>
+                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-transparent border-t-white"></div>
+                    <span className="text-sm">Enhancing...</span>
+                  </>
+                ) : (
+                  <span className="text-sm">Enhance</span>
+                )}
+              </button>
 
               <button
                 type="submit"
