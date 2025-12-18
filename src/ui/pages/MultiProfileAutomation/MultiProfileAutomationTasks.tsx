@@ -1,4 +1,4 @@
-import { Calendar, Check, Play, Square } from "lucide-react";
+import { Calendar, Check, Loader, Play, Square, Wand2 } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -93,7 +93,8 @@ function MultiProfileAutomationTasks() {
   const modelConfig = configs[activeProvider];
 
   // Mutation hook to enhance prompt
-  const [enhancePrompt] = useEnhancePromptMutation();
+  const [enhancePrompt, { isLoading: isEnhancingLoading }] =
+    useEnhancePromptMutation();
 
   // Use react-datepicker directly for picking date/time. The package must be
   // installed in the project for this to work.
@@ -199,29 +200,13 @@ function MultiProfileAutomationTasks() {
 
   const handleEnhancePrompt = async () => {
     if (!localPrompt.trim()) {
-      setOperationStatus({
-        status: "error",
-        message: "Please enter a prompt before enhancing",
-      });
-      setTimeout(() => setOperationStatus({ status: "idle" }), 3000);
       return;
     }
 
     try {
-      setOperationStatus({ status: "saving", message: "Enhancing prompt..." });
       const response = await enhancePrompt({ prompt: localPrompt }).unwrap();
       setLocalPrompt(response.enhancedPrompt);
-      setOperationStatus({
-        status: "saved",
-        message: "Prompt enhanced successfully",
-      });
-      setTimeout(() => setOperationStatus({ status: "idle" }), 3000);
     } catch (error) {
-      setOperationStatus({
-        status: "error",
-        message: "Failed to enhance prompt",
-      });
-      setTimeout(() => setOperationStatus({ status: "idle" }), 3000);
       console.error("Enhance prompt error:", error);
     }
   };
@@ -495,7 +480,7 @@ function MultiProfileAutomationTasks() {
             </span>
           </div>
         </PageTitle>
-        <div className="flex flex-grow items-center justify-center">
+        <div className="flex grow items-center justify-center">
           <div className="text-center">
             <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-2 border-transparent border-t-white/70"></div>
             <span className="text-white/70">Loading profiles...</span>
@@ -597,13 +582,27 @@ function MultiProfileAutomationTasks() {
             }}
             className="flex gap-2 space-y-2"
           >
-            <textarea
-              value={localPrompt}
-              onChange={(e) => setLocalPrompt(e.target.value)}
-              className="h-20 w-full max-w-160 resize-none border border-white/20 bg-black/40 p-2 text-sm text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
-              placeholder="Enter your automation prompt here (e.g. 'Post a tweet about my latest project')"
-              disabled={isStarting}
-            />
+            <div className="relative grow">
+              <textarea
+                value={localPrompt}
+                onChange={(e) => setLocalPrompt(e.target.value)}
+                className="h-20 w-full resize-none border border-white/20 bg-black/40 p-2 pr-10 text-sm text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
+                placeholder="Enter your automation prompt here (e.g. 'Post a tweet about my latest project')"
+                disabled={isStarting}
+              />
+              <button
+                type="button"
+                onClick={handleEnhancePrompt}
+                disabled={isEnhancingLoading || !localPrompt.trim()}
+                className="absolute top-0 right-0 bg-blue-600/20 px-2 py-1 text-xs text-white transition-colors hover:bg-blue-600/30 disabled:opacity-40"
+              >
+                {isEnhancingLoading ? (
+                  <Loader size={16} className="animate-spin" />
+                ) : (
+                  <Wand2 size={16} />
+                )}
+              </button>
+            </div>
 
             {/* Compact delay input */}
             <div className="flex flex-col gap-2">
@@ -634,24 +633,6 @@ function MultiProfileAutomationTasks() {
                   <span className="text-sm">Stop All</span>
                 </button>
               )}
-
-              <button
-                type="button"
-                onClick={handleEnhancePrompt}
-                disabled={
-                  !localPrompt.trim() || operationStatus.status === "saving"
-                }
-                className="bg-green-600 px-2 py-1 text-sm text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {operationStatus.status === "saving" ? (
-                  <>
-                    <div className="h-3 w-3 animate-spin rounded-full border-2 border-transparent border-t-white"></div>
-                    <span className="text-sm">Enhancing...</span>
-                  </>
-                ) : (
-                  <span className="text-sm">Enhance</span>
-                )}
-              </button>
 
               <button
                 type="submit"
@@ -704,7 +685,7 @@ function MultiProfileAutomationTasks() {
                 <button
                   key={item.id}
                   onClick={() => setLocalPrompt(item.prompt)}
-                  className="block w-full border border-blue-400/20 bg-black/20 px-2 py-[2px] text-left text-sm text-blue-200/80 transition-colors hover:border-blue-400/40 hover:bg-blue-500/20 hover:text-blue-200"
+                  className="block w-full border border-blue-400/20 bg-black/20 px-2 py-0.5 text-left text-sm text-blue-200/80 transition-colors hover:border-blue-400/40 hover:bg-blue-500/20 hover:text-blue-200"
                   title={item.prompt}
                 >
                   <div className="truncate">{item.prompt}</div>
@@ -751,7 +732,7 @@ function MultiProfileAutomationTasks() {
                 timeFormat="h:mm aa"
                 timeIntervals={5}
                 dateFormat="yyyy-MM-dd h:mm aa"
-                className="w-full !rounded-none border border-white/20 bg-black/40 px-2 py-1 text-sm text-white focus:border-blue-500"
+                className="w-full rounded-none! border border-white/20 bg-black/40 px-2 py-1 text-sm text-white focus:border-blue-500"
                 placeholderText="Select start time"
               />
             </div>
@@ -769,7 +750,7 @@ function MultiProfileAutomationTasks() {
                 timeFormat="h:mm aa"
                 timeIntervals={5}
                 dateFormat="yyyy-MM-dd h:mm aa"
-                className="w-full !rounded-none border border-white/20 bg-black/40 px-2 py-1 text-sm text-white focus:border-blue-500"
+                className="w-full rounded-none! border border-white/20 bg-black/40 px-2 py-1 text-sm text-white focus:border-blue-500"
                 placeholderText="Select end time"
               />
             </div>
