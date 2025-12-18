@@ -265,7 +265,9 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
         return;
       }
 
-      // Clear previous logs for this profile
+      // Clear previous state for this profile
+      updateProfileTask(profile, { result: null });
+      clearProfileAttachedRule(profile);
       clearProfileLogs(profile);
 
       const activeWalletForTask = wallets.find(
@@ -871,8 +873,16 @@ function AutomationTerminalPage() {
               className="border border-white/10 bg-transparent px-3 py-1 text-sm text-white/70 transition-colors hover:bg-white/5"
               disabled={isCurrentProfileRunning}
               onClick={() => {
-                const { clearProfileLogs } = useAutomationStore.getState();
+                const {
+                  clearProfileLogs,
+                  updateProfileTask,
+                  clearProfileAttachedRule,
+                  setProfilePrompt,
+                } = useAutomationStore.getState();
                 clearProfileLogs(activeProfile);
+                updateProfileTask(activeProfile, { result: null });
+                clearProfileAttachedRule(activeProfile);
+                setProfilePrompt(activeProfile, "");
               }}
             >
               Clear
