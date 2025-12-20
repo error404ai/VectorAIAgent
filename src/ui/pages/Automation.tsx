@@ -264,7 +264,6 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
 
       // Clear previous state for this profile
       updateProfileTask(profile, { result: null });
-      clearProfileAttachedRule(profile);
       clearProfileLogs(profile);
 
       const activeWalletForTask = wallets.find(
@@ -386,6 +385,9 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
         setLocalPrompt("");
         setProfilePrompt(profile, "");
       }
+
+      // Clear the attached rule after task completion
+      clearProfileAttachedRule(profile);
     } catch (error: unknown) {
       console.error("Error starting automation:", error);
       const message = (error as Error).message;
@@ -407,6 +409,9 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
           result: { success: false, message },
         });
       }
+
+      // Clear the attached rule after task failure
+      clearProfileAttachedRule(profile);
     }
   };
 
