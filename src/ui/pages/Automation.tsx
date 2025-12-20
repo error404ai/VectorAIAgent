@@ -560,7 +560,7 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
         </div>
 
         <div className="flex">
-          {isRunning || isSearchingRules ? (
+          {isRunning ? (
             <button
               type="button"
               onClick={handleStopTask}
