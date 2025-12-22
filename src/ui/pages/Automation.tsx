@@ -556,11 +556,14 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
             }
             className="w-full min-w-0 resize-none border-none bg-transparent px-4 py-3 text-white placeholder-white/50 focus:outline-none disabled:opacity-60"
           />
+        </div>
+
+        <div className="flex flex-col justify-center gap-2 px-1">
           <button
             type="button"
             onClick={handleEnhancePrompt}
             disabled={isLoading || !localPrompt.trim()}
-            className="absolute right-0 bg-blue-600/20 px-2 py-1 text-xs text-white transition-colors hover:bg-blue-600/30 disabled:opacity-40"
+            className="bg-blue-600/20 px-2 py-1 text-xs text-white transition-colors hover:bg-blue-600/30 disabled:opacity-40"
           >
             {isLoading ? (
               <Loader size={16} className="animate-spin" />
@@ -572,14 +575,11 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
             type="button"
             onClick={() => setIsModalOpen(true)}
             disabled={isRunning}
-            className="absolute right-10 bg-blue-600/20 px-2 py-1 text-xs text-white transition-colors hover:bg-blue-600/30 disabled:opacity-40"
+            className="bg-blue-600/20 px-2 py-1 text-xs text-white transition-colors hover:bg-blue-600/30 disabled:opacity-40"
             title="Expand"
           >
             <Maximize2 size={16} />
           </button>
-          <div className="absolute right-3 bottom-2 text-xs text-white/40">
-            {localPrompt.length} chars
-          </div>
         </div>
 
         <div className="flex">
