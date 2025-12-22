@@ -55,14 +55,17 @@ const Modal: React.FC<ModalProps> = ({
     >
       <div
         className={
-          `w-full ${getSizeClass()} transform border border-white/20 bg-[#091E38] p-6 transition-transform duration-300 ease-in-out ` +
+          `w-full ${getSizeClass()} transform border border-white/20 bg-[#091E38] p-4 transition-transform duration-300 ease-in-out ` +
           (visible ? "scale-100" : "scale-95")
         }
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-2 flex items-center justify-between">
           {title && <h2 className="text-lg font-medium text-white">{title}</h2>}
-          <button onClick={onClose} className="text-white/50 hover:text-white">
+          <button
+            onClick={onClose}
+            className="p-1 text-white/50 hover:text-white"
+          >
             &times;
           </button>
         </div>

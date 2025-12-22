@@ -625,7 +625,7 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
           <div className="flex justify-end gap-2">
             <button
               onClick={() => setIsModalOpen(false)}
-              className="border border-white/20 bg-white/10 px-4 py-2 text-white transition-colors hover:bg-white/20"
+              className="border border-white/20 bg-white/10 px-2 py-1 text-white transition-colors hover:bg-white/20"
             >
               Close
             </button>
