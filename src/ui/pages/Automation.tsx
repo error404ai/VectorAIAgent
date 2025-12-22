@@ -627,13 +627,7 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
               onClick={() => setIsModalOpen(false)}
               className="border border-white/20 bg-white/10 px-4 py-2 text-white transition-colors hover:bg-white/20"
             >
-              Cancel
-            </button>
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="border border-white/20 bg-blue-600/20 px-4 py-2 text-white transition-colors hover:bg-blue-600/30"
-            >
-              Save
+              Close
             </button>
           </div>
         </div>
