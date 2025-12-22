@@ -272,7 +272,7 @@ function MultiProfileAutomationTasks() {
 
       const ruleResponse = await searchAiRules({
         prompt: localPrompt.trim(),
-        limit: 1,
+        limit: 3,
       }).unwrap();
 
       if (ruleResponse.data && ruleResponse.data.length > 0) {

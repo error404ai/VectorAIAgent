@@ -180,7 +180,7 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
 
       const ruleResponse = await searchAiRules({
         prompt: trimmedPrompt,
-        limit: 1,
+        limit: 3,
       }).unwrap();
 
       if (ruleResponse.data && ruleResponse.data.length > 0) {
