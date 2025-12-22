@@ -1,10 +1,18 @@
-import { Clock, Loader, OctagonPause, Star, Wand2 } from "lucide-react";
+import {
+  Clock,
+  Loader,
+  Maximize2,
+  OctagonPause,
+  Star,
+  Wand2,
+} from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import type {
   AutomationResultData,
   AutomationRuntimeOptions,
   Window,
 } from "../../../types/global-types";
+import Modal from "../components/Modal";
 import PageTitle from "../components/PageTitle";
 import ProfileTab from "../components/ProfileTab";
 import PromptSidebar from "../components/PromptSidebar";
@@ -56,6 +64,7 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
 
   const profileState = getProfileState(profile);
   const [localPrompt, setLocalPrompt] = useState(profileState.prompt);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Sync local prompt with store
   useEffect(() => {
@@ -559,6 +568,15 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
               <Wand2 size={16} />
             )}
           </button>
+          <button
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+            disabled={isRunning}
+            className="absolute right-10 bg-blue-600/20 px-2 py-1 text-xs text-white transition-colors hover:bg-blue-600/30 disabled:opacity-40"
+            title="Expand"
+          >
+            <Maximize2 size={16} />
+          </button>
           <div className="absolute right-3 bottom-2 text-xs text-white/40">
             {localPrompt.length} chars
           </div>
@@ -587,6 +605,39 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
           )}
         </div>
       </form>
+
+      {/* Prompt Edit Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Edit Prompt"
+        size="xl"
+      >
+        <div className="space-y-4">
+          <textarea
+            value={localPrompt}
+            onChange={(e) => handlePromptChange(e.target.value)}
+            className="w-full resize-none border border-white/20 bg-black/40 p-3 text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
+            rows={12}
+            placeholder="Enter natural language automation prompt..."
+            autoFocus
+          />
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="border border-white/20 bg-white/10 px-4 py-2 text-white transition-colors hover:bg-white/20"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="border border-white/20 bg-blue-600/20 px-4 py-2 text-white transition-colors hover:bg-blue-600/30"
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

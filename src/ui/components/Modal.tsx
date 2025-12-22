@@ -5,11 +5,31 @@ interface ModalProps {
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
+  size?: "sm" | "lg" | "xl";
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+const Modal: React.FC<ModalProps> = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  size = "lg",
+}) => {
   const [show, setShow] = React.useState(false);
   const [visible, setVisible] = React.useState(false);
+
+  const getSizeClass = () => {
+    switch (size) {
+      case "sm":
+        return "max-w-sm";
+      case "lg":
+        return "max-w-lg";
+      case "xl":
+        return "max-w-2xl";
+      default:
+        return "max-w-lg";
+    }
+  };
 
   React.useEffect(() => {
     if (isOpen) {
@@ -35,7 +55,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
     >
       <div
         className={
-          `w-full max-w-md transform border border-white/20 bg-[#091E38] p-6 transition-transform duration-300 ease-in-out ` +
+          `w-full ${getSizeClass()} transform border border-white/20 bg-[#091E38] p-6 transition-transform duration-300 ease-in-out ` +
           (visible ? "scale-100" : "scale-95")
         }
         onClick={(e) => e.stopPropagation()}
