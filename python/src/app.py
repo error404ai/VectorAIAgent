@@ -27,9 +27,15 @@ from . import cli
 
 def setup_logging() -> None:
     """Configure logging for the application"""
+    # Create a custom handler that flushes
+    class FlushingStreamHandler(logging.StreamHandler):
+        def emit(self, record):
+            super().emit(record)
+            self.flush()
+    
     logging.basicConfig(
-        level=logging.INFO,
-        handlers=[logging.StreamHandler(sys.stdout)],
+        level=logging.DEBUG,  # Changed to DEBUG to capture agent step logs
+        handlers=[FlushingStreamHandler(sys.stdout)],
         format='%(levelname)s: %(message)s'
     )
 
@@ -50,13 +56,13 @@ async def main_async() -> int:
         # Initialize paths
         paths: dict[str, str] = initialize_paths()
         if not paths:
-            print("[ERROR] Failed to initialize paths", file=sys.stderr)
+            print("[ERROR] Failed to initialize paths", file=sys.stderr, flush=True)
             return 1
             
         # Log the environment information
-        print(f"[INFO] Running on Python {sys.version.split()[0]}")
-        print(f"[INFO] Platform: {sys.platform}")
-        print(f"[INFO] Driver path: {paths.get('driver_path', 'Not set')}")
+        print(f"[INFO] Running on Python {sys.version.split()[0]}", flush=True)
+        print(f"[INFO] Platform: {sys.platform}", flush=True)
+        print(f"[INFO] Driver path: {paths.get('driver_path', 'Not set')}", flush=True)
         
         # Parse command line arguments
         args: argparse.Namespace = cli.parse_args()
@@ -64,11 +70,11 @@ async def main_async() -> int:
         # Execute the appropriate command
         if args.command == 'automation':
             # Run browser automation
-            print(f"[START] Running browser automation with prompt: {args.prompt}")
+            print(f"[START] Running browser automation with prompt: {args.prompt}", flush=True)
             # Check if browser_path is provided
             browser_path = args.browser_path if hasattr(args, 'browser_path') and args.browser_path else ""
             if browser_path:
-                print(f"[CONFIG] Using custom browser path for automation: {browser_path}")
+                print(f"[CONFIG] Using custom browser path for automation: {browser_path}", flush=True)
             
             # Get the profile name if provided
             profile_name = args.profile if hasattr(args, 'profile') else "default_profile"
@@ -83,11 +89,11 @@ async def main_async() -> int:
             wallet_secret_key = getattr(args, 'wallet_secret_key', None)
             upload_directory = getattr(args, 'upload_directory', None)
             
-            print("wallet_public_key:", wallet_public_key)
-            print("wallet_secret_env:", wallet_secret_env)
-            print("wallet_secret_key:", wallet_secret_key)
+            print("wallet_public_key:", wallet_public_key, flush=True)
+            print("wallet_secret_env:", wallet_secret_env, flush=True)
+            print("wallet_secret_key:", wallet_secret_key, flush=True)
             if upload_directory:
-                print("[FILES] Upload directory configured:", upload_directory)
+                print("[FILES] Upload directory configured:", upload_directory, flush=True)
 
             result = await run_automation(
                 prompt=args.prompt, 
@@ -112,12 +118,12 @@ async def main_async() -> int:
             
         elif args.command == 'browser':
             # Open a browser
-            print(f"[BROWSER] Opening browser at URL: {args.url}")
+            print(f"[BROWSER] Opening browser at URL: {args.url}", flush=True)
             browser_path = args.browser_path if hasattr(args, 'browser_path') else ""
             profile_name = args.profile if hasattr(args, 'profile') else "default_profile"
             if browser_path:
-                print(f"[CONFIG] Using custom browser path: {browser_path}")
-            print(f"[PROFILE] Using profile: {profile_name}")
+                print(f"[CONFIG] Using custom browser path: {browser_path}", flush=True)
+            print(f"[PROFILE] Using profile: {profile_name}", flush=True)
             result = await open_browser(args.url, args.headless, browser_path, profile_name)
             return result
             

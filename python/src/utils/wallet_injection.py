@@ -37,7 +37,7 @@ class WalletInjectionHelper:
         else:
             warning = "[WALLET] Unable to access CDP session for injection"
             if warning != self._last_warning:
-                print(warning)
+                print(warning, flush=True)
                 self._last_warning = warning
             return
 
@@ -57,7 +57,7 @@ class WalletInjectionHelper:
                 session_id=session_id,
             )
         except Exception as exc:  # noqa: BLE001 - we want to log and continue
-            print(f"[WALLET] Failed to register provider for new documents: {exc}")
+            print(f"[WALLET] Failed to register provider for new documents: {exc}", flush=True)
 
         try:
             await client.send.Runtime.evaluate(
@@ -68,6 +68,6 @@ class WalletInjectionHelper:
                 session_id=session_id,
             )
             self._injected_targets.add(target_id)
-            print(f"[WALLET] Provider injected for tab {target_id[-4:]} (total={len(self._injected_targets)})")
+            print(f"[WALLET] Provider injected for tab {target_id[-4:]} (total={len(self._injected_targets)})", flush=True)
         except Exception as exc:  # noqa: BLE001
-            print(f"[WALLET] Provider injection failed: {exc}")
+            print(f"[WALLET] Provider injection failed: {exc}", flush=True)

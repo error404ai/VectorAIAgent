@@ -65,6 +65,14 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
   const profileState = getProfileState(profile);
   const [localPrompt, setLocalPrompt] = useState(profileState.prompt);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const logContainerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when logs change
+  useEffect(() => {
+    if (logContainerRef.current) {
+      logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+    }
+  }, [profileState.logs]);
 
   // Sync local prompt with store
   useEffect(() => {
@@ -439,7 +447,10 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
   return (
     <div className="flex min-w-0 grow flex-col gap-5 overflow-auto">
       {profileState.logs.length > 0 && (
-        <div className="terminal-scrollbar max-h-[calc(100vh-270px)] overflow-auto border border-white/10 bg-black/30 p-4 font-mono text-sm backdrop-blur-sm">
+        <div
+          ref={logContainerRef}
+          className="terminal-scrollbar max-h-[calc(100vh-270px)] overflow-auto border border-white/10 bg-black/30 p-4 font-mono text-sm backdrop-blur-sm"
+        >
           <div className="mb-2 flex items-center justify-between border-b border-white/10 pb-2">
             <span className="font-medium text-white/80">
               Console Output - {profile}

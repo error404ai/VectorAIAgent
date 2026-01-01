@@ -3,19 +3,44 @@
 """
 Browser automation module using AI to perform tasks in a browser.
 """
-import asyncio
-import argparse
 import sys
-import json
 import os
-from typing import Any, Dict, Union, TypeVar, Optional
-from browser_use import Agent, BrowserProfile, BrowserSession
-from ..utils.user_profile import get_chrome_profile, list_chrome_profiles
-from ..utils.llm import get_llm
-from ..utils.chromium_manager import get_chromium_executable_path
-from ..common.config import initialize_paths
-from ..utils.wallet_manager import WalletManager
+from io import StringIO
+from typing import TypeVar, Dict, Any, Optional
+
+# Browser-use imports
+from browser_use.agent.service import Agent
+from browser_use.browser.session import BrowserSession
+from browser_use.browser.profile import BrowserProfile
+
+# Local imports
 from ..utils.wallet_injection import WalletInjectionHelper
+from ..utils.user_profile import get_chrome_profile, list_chrome_profiles
+from ..utils.chromium_manager import get_chromium_executable_path
+from ..utils.llm import get_llm
+
+class ImmediateStdout:
+    """A stdout wrapper that flushes immediately"""
+    def __init__(self, original_stdout):
+        self.original = original_stdout
+    
+    def write(self, text):
+        self.original.write(text)
+        self.original.flush()
+    
+    def flush(self):
+        self.original.flush()
+
+# Replace stdout with immediate flushing version
+original_stdout = sys.stdout
+sys.stdout = ImmediateStdout(original_stdout)
+
+# Reconfigure browser-use logging to use our immediate stdout
+import logging
+from browser_use.logging_config import setup_logging
+
+# Force re-setup of logging with our new stdout
+setup_logging(stream=sys.stdout, force_setup=True)
 
 # Type variables for better typing
 T = TypeVar('T')
@@ -74,8 +99,8 @@ async def run_automation(
     Returns:
         Dictionary with result information
     """
-    print(f"[START] Starting browser automation with task: {prompt}")
-    print(f"[AI] Using {provider} model: {model}")
+    print(f"[START] Starting browser automation with task: {prompt}", flush=True)
+    print(f"[AI] Using {provider} model: {model}", flush=True)
     
     # # set configuration environment variables
     # os.environ["IS_IN_EVALS"] = "true"  # Indicate we are in an evaluation context
@@ -103,15 +128,15 @@ async def run_automation(
                 # Note: AWS also needs AWS_SECRET_ACCESS_KEY and AWS_REGION
     
     # Create agent with direct page access using the simpler approach
-    print("[CONFIG] Creating agent...")
+    print("[CONFIG] Creating agent...", flush=True)
     # Use the profile provided in parameters, fallback to default if not specified
     profile_dir = await get_chrome_profile(profile_name or "default_profile", browser_path=browser_path)
     
-    print(f"[CONFIG] Using Chrome profile: {profile_name}")
-    print(f"[CONFIG] Profile directory: {profile_dir}")
+    print(f"[CONFIG] Using Chrome profile: {profile_name}", flush=True)
+    print(f"[CONFIG] Profile directory: {profile_dir}", flush=True)
     
     profiles = list_chrome_profiles()
-    print(f"[CONFIG] Available Chrome profiles: {profiles}")
+    print(f"[CONFIG] Available Chrome profiles: {profiles}", flush=True)
     
     # Determine which browser executable to use
     final_browser_path = None
@@ -119,15 +144,15 @@ async def run_automation(
     if browser_path:
         # User provided a specific browser path
         final_browser_path = browser_path
-        print(f"[CONFIG] Using user-specified browser: {browser_path}")
+        print(f"[CONFIG] Using user-specified browser: {browser_path}", flush=True)
     else:
         # Check if we have WhiskeyBA's installed Chromium
         whiskey_chromium_path = get_chromium_executable_path()
         if whiskey_chromium_path:
             final_browser_path = whiskey_chromium_path
-            print(f"[CONFIG] Using WhiskeyBA's installed Chromium: {whiskey_chromium_path}")
+            print(f"[CONFIG] Using WhiskeyBA's installed Chromium: {whiskey_chromium_path}", flush=True)
         else:
-            print("[CONFIG] Using patchright's default Chromium (built-in)")
+            print("[CONFIG] Using patchright's default Chromium (built-in)", flush=True)
     
     # Create the browser profile with stealth mode for anti-detection
     browser_profile = BrowserProfile(
@@ -187,13 +212,25 @@ async def run_automation(
     )
     
     # Run the agent
-    print("[AI] Running browser automation...")
+    print("[AI] Running browser automation...", flush=True)
+    
+    async def on_step_end(agent_instance):
+        """Callback to log step completion"""
+        current_step = agent_instance.state.n_steps
+        print(f"[STEP] Completed step {current_step}", flush=True)
+        # Force flush stdout
+        import sys
+        sys.stdout.flush()
+    
     result = await agent.run(
         on_step_start=wallet_helper.on_step_start if wallet_helper else None,
+        on_step_end=on_step_end,
     )  # type: ignore
 
-    print("\n[RESULTS] Results:")
-    print(result)  # type: ignore
+    print("[AI] Agent run completed", flush=True)
+
+    print("\n[RESULTS] Results:", flush=True)
+    print(result, flush=True)  # type: ignore
 
     automation_done = False
     automation_success: bool | None = None
@@ -331,8 +368,9 @@ async def run_automation(
                 "total_steps": total_steps,
             }
         ),
+        flush=True,
     )
-    print(f"\n[COMPLETE] Final result: {json.dumps(final_result)}")
+    print(f"\n[COMPLETE] Final result: {json.dumps(final_result)}", flush=True)
     return final_result
             
   

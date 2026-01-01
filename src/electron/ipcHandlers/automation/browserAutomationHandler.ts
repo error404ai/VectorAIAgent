@@ -412,12 +412,13 @@ export function registerBrowserAutomationHandlers() {
 
         const logHandler = (log: string) => {
           logs.push(log);
-          // Use BrowserWindow.getAllWindows() to find the automation window
+          // Use BrowserWindow.getAllWindows() to send to all windows
           const windows = BrowserWindow.getAllWindows();
-          const mainWindow = windows.find((w) =>
-            w.title.includes("Automation:"),
-          );
-          mainWindow?.webContents.send("browserAutomationLog", log);
+          windows.forEach((window) => {
+            if (!window.isDestroyed()) {
+              window.webContents.send("browserAutomationLog", log);
+            }
+          });
         };
 
         const errorHandler = (error: string) => {
@@ -731,7 +732,10 @@ export function registerBrowserAutomationHandlers() {
 
         args.push(...walletPreparation.args);
 
-        const spawnEnv = walletPreparation.env;
+        const spawnEnv = {
+          ...walletPreparation.env,
+          PYTHONUNBUFFERED: "1", // Force unbuffered stdout/stderr for live logging
+        };
 
         const pythonProcess = spawn(appExePath, args, {
           windowsHide: true, // Hide console window on Windows
@@ -741,12 +745,13 @@ export function registerBrowserAutomationHandlers() {
 
         const logHandler = (log: string) => {
           logs.push(log);
-          // Send logs with task ID to renderer
+          // Send logs to all windows to ensure they reach the UI
           const windows = BrowserWindow.getAllWindows();
-          const mainWindow = windows.find((w) =>
-            w.title.includes("Automation:"),
-          );
-          mainWindow?.webContents.send("browserAutomationLog", { taskId, log });
+          windows.forEach((window) => {
+            if (!window.isDestroyed()) {
+              window.webContents.send("browserAutomationLog", { taskId, log });
+            }
+          });
         };
 
         const errorHandler = (error: string) => {
