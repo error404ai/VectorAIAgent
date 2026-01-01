@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# filepath: c:\Projects\WhiskeyBA\python\src\app_fixed.py
 """
 Main entry point for the WhiskeyBA Python application.
 This module provides a unified interface for all WhiskeyBA functionality,

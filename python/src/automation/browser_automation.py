@@ -1,12 +1,10 @@
 #!/usr/bin/env python
-# filepath: c:\Projects\WhiskeyBA\python\src\automation\browser_automation.py
 """
 Browser automation module using AI to perform tasks in a browser.
 """
 import sys
 import os
-from io import StringIO
-from typing import TypeVar, Dict, Any, Optional
+from typing import Dict, Any, Optional
 
 # Browser-use imports
 from browser_use.agent.service import Agent
@@ -41,24 +39,6 @@ from browser_use.logging_config import setup_logging
 
 # Force re-setup of logging with our new stdout
 setup_logging(stream=sys.stdout, force_setup=True)
-
-# Type variables for better typing
-T = TypeVar('T')
-
-class StreamToStdout:
-    """
-    Helper class for streaming output to stdout with an optional prefix.
-    """
-    def __init__(self, prefix: str = ""):
-        self.prefix = prefix
-
-    def write(self, message: str) -> None:
-        if message.strip(): 
-            print(f"{self.prefix}{message}", flush=True)
-
-    def flush(self) -> None:
-        sys.stdout.flush()
-        
 
 async def run_automation(
     prompt: str, 
@@ -101,9 +81,6 @@ async def run_automation(
     """
     print(f"[START] Starting browser automation with task: {prompt}", flush=True)
     print(f"[AI] Using {provider} model: {model}", flush=True)
-    
-    # # set configuration environment variables
-    # os.environ["IS_IN_EVALS"] = "true"  # Indicate we are in an evaluation context
     
     # Set API key if provided
     if api_key:
@@ -218,9 +195,6 @@ async def run_automation(
         """Callback to log step completion"""
         current_step = agent_instance.state.n_steps
         print(f"[STEP] Completed step {current_step}", flush=True)
-        # Force flush stdout
-        import sys
-        sys.stdout.flush()
     
     result = await agent.run(
         on_step_start=wallet_helper.on_step_start if wallet_helper else None,
