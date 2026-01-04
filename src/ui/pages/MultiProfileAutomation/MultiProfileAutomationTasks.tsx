@@ -6,6 +6,7 @@ import Modal from "../../components/Modal";
 import PageTitle from "../../components/PageTitle";
 import { useSearchAiRulesMutation } from "../../RTKService/aiRuleService";
 import { useEnhancePromptMutation } from "../../RTKService/promptService";
+import { useAgentSettingsStore } from "../../stores/AgentSettingsStore";
 import { useAISettingsStore } from "../../stores/AISettingsStore";
 import {
   useAutomationStore,
@@ -93,6 +94,7 @@ function MultiProfileAutomationTasks() {
   );
 
   const { activeProvider, configs } = useAISettingsStore();
+  const { enableAIRules } = useAgentSettingsStore();
   const modelConfig = configs[activeProvider];
 
   // Mutation hook to enhance prompt
@@ -264,53 +266,60 @@ function MultiProfileAutomationTasks() {
     });
 
     let enhancedPrompt = localPrompt.trim();
-    try {
-      setOperationStatus({
-        status: "saving",
-        message: "Searching for AI rules...",
-      });
+    if (enableAIRules) {
+      try {
+        setOperationStatus({
+          status: "saving",
+          message: "Searching for AI rules...",
+        });
 
-      const ruleResponse = await searchAiRules({
-        prompt: localPrompt.trim(),
-        limit: 3,
-      }).unwrap();
+        const ruleResponse = await searchAiRules({
+          prompt: localPrompt.trim(),
+          limit: 3,
+        }).unwrap();
 
-      if (ruleResponse.data && ruleResponse.data.length > 0) {
-        const topRule = ruleResponse.data[0];
+        if (ruleResponse.data && ruleResponse.data.length > 0) {
+          const topRule = ruleResponse.data[0];
 
-        if (
-          topRule.similarity_score &&
-          topRule.similarity_score >= RULE_SIMILARITY_THRESHOLD
-        ) {
-          // Attach the rule to all target profiles
-          targetProfiles.forEach((profile) => {
-            setProfileAttachedRule(profile, topRule);
-          });
+          if (
+            topRule.similarity_score &&
+            topRule.similarity_score >= RULE_SIMILARITY_THRESHOLD
+          ) {
+            // Attach the rule to all target profiles
+            targetProfiles.forEach((profile) => {
+              setProfileAttachedRule(profile, topRule);
+            });
 
-          setOperationStatus({
-            status: "saving",
-            message: `Found matching rule: "${topRule.name}" (${(topRule.similarity_score * 100).toFixed(1)}% similarity)`,
-          });
+            setOperationStatus({
+              status: "saving",
+              message: `Found matching rule: "${topRule.name}" (${(topRule.similarity_score * 100).toFixed(1)}% similarity)`,
+            });
 
-          // Enhance the prompt with the rule
-          enhancedPrompt = `${topRule.rule}\n\nOriginal task: ${localPrompt.trim()}`;
+            // Enhance the prompt with the rule
+            enhancedPrompt = `${topRule.rule}\n\nOriginal task: ${localPrompt.trim()}`;
+          } else {
+            setOperationStatus({
+              status: "saving",
+              message: `Rule found but similarity too low (${(topRule.similarity_score || 0) * 100}%)`,
+            });
+          }
         } else {
           setOperationStatus({
             status: "saving",
-            message: `Rule found but similarity too low (${(topRule.similarity_score || 0) * 100}%)`,
+            message: "No matching AI rules found",
           });
         }
-      } else {
+      } catch (error) {
+        console.error("Failed to retrieve AI rules:", error);
         setOperationStatus({
           status: "saving",
-          message: "No matching AI rules found",
+          message: "Failed to search AI rules, proceeding without rules",
         });
       }
-    } catch (error) {
-      console.error("Failed to retrieve AI rules:", error);
+    } else {
       setOperationStatus({
         status: "saving",
-        message: "Failed to search AI rules, proceeding without rules",
+        message: "AI rules search disabled",
       });
     }
 

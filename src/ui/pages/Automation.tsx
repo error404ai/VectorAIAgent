@@ -19,6 +19,7 @@ import PromptSidebar from "../components/PromptSidebar";
 import { useCreateAgentTaskMutation } from "../RTKService/agentTaskService";
 import { useSearchAiRulesMutation } from "../RTKService/aiRuleService";
 import { useEnhancePromptMutation } from "../RTKService/promptService";
+import { useAgentSettingsStore } from "../stores/AgentSettingsStore";
 import { useAISettingsStore } from "../stores/AISettingsStore";
 import { useAutomationStore } from "../stores/AutomationStore";
 import { useBrowserSettingsStore } from "../stores/BrowserSettingsStore";
@@ -48,6 +49,7 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
 
   // Get the active model configuration from the store
   const { activeProvider, configs, fileUploadDirectory } = useAISettingsStore();
+  const { enableAIRules } = useAgentSettingsStore();
   const modelConfig = configs[activeProvider];
 
   const { wallets, setWallets } = useWalletStore();
@@ -192,53 +194,60 @@ const ProfileAutomationPanel: React.FC<ProfileAutomationPanelProps> = ({
     clearProfileAttachedRule(profile);
 
     let enhancedPrompt = trimmedPrompt;
-    try {
-      addProfileLog(profile, "🔍 Searching for relevant AI rules...");
+    if (enableAIRules) {
+      try {
+        addProfileLog(profile, "🔍 Searching for relevant AI rules...");
 
-      const ruleResponse = await searchAiRules({
-        prompt: trimmedPrompt,
-        limit: 3,
-      }).unwrap();
+        const ruleResponse = await searchAiRules({
+          prompt: trimmedPrompt,
+          limit: 3,
+        }).unwrap();
 
-      if (ruleResponse.data && ruleResponse.data.length > 0) {
-        const topRule = ruleResponse.data[0];
+        if (ruleResponse.data && ruleResponse.data.length > 0) {
+          const topRule = ruleResponse.data[0];
 
-        if (
-          topRule.similarity_score &&
-          topRule.similarity_score >= RULE_SIMILARITY_THRESHOLD
-        ) {
-          setProfileAttachedRule(profile, topRule);
-          addProfileLog(
-            profile,
-            `✅ Found matching rule: "${topRule.name}" (similarity: ${(topRule.similarity_score * 100).toFixed(1)}%)`,
-          );
-          addProfileLog(profile, `📋 Rule description: ${topRule.description}`);
+          if (
+            topRule.similarity_score &&
+            topRule.similarity_score >= RULE_SIMILARITY_THRESHOLD
+          ) {
+            setProfileAttachedRule(profile, topRule);
+            addProfileLog(
+              profile,
+              `✅ Found matching rule: "${topRule.name}" (similarity: ${(topRule.similarity_score * 100).toFixed(1)}%)`,
+            );
+            addProfileLog(
+              profile,
+              `📋 Rule description: ${topRule.description}`,
+            );
 
-          // Enhance the prompt with the rule
-          enhancedPrompt = `${topRule.rule}\n\nOriginal task: ${trimmedPrompt}`;
-          addProfileLog(profile, "🔗 Rule attached to automation prompt");
+            // Enhance the prompt with the rule
+            enhancedPrompt = `${topRule.rule}\n\nOriginal task: ${trimmedPrompt}`;
+            addProfileLog(profile, "🔗 Rule attached to automation prompt");
+          } else {
+            addProfileLog(
+              profile,
+              `⚠️ Found rule but similarity too low: ${(topRule.similarity_score || 0) * 100}% < ${RULE_SIMILARITY_THRESHOLD * 100}%`,
+            );
+            setProfileRuleError(
+              profile,
+              "No matching rule found with sufficient similarity",
+            );
+          }
         } else {
-          addProfileLog(
-            profile,
-            `⚠️ Found rule but similarity too low: ${(topRule.similarity_score || 0) * 100}% < ${RULE_SIMILARITY_THRESHOLD * 100}%`,
-          );
-          setProfileRuleError(
-            profile,
-            "No matching rule found with sufficient similarity",
-          );
+          addProfileLog(profile, "ℹ️ No matching rules found");
+          setProfileRuleError(profile, "No rules found");
         }
-      } else {
-        addProfileLog(profile, "ℹ️ No matching rules found");
-        setProfileRuleError(profile, "No rules found");
+      } catch (error) {
+        console.error("Failed to retrieve AI rules:", error);
+        const errorMessage = (error as Error).message || "Unknown error";
+        addProfileLog(
+          profile,
+          `⚠️ Failed to retrieve AI rules: ${errorMessage}. Proceeding without rule.`,
+        );
+        setProfileRuleError(profile, errorMessage);
       }
-    } catch (error) {
-      console.error("Failed to retrieve AI rules:", error);
-      const errorMessage = (error as Error).message || "Unknown error";
-      addProfileLog(
-        profile,
-        `⚠️ Failed to retrieve AI rules: ${errorMessage}. Proceeding without rule.`,
-      );
-      setProfileRuleError(profile, errorMessage);
+    } else {
+      addProfileLog(profile, "ℹ️ AI rules search disabled");
     }
 
     // Check if API key is required and present for the active provider

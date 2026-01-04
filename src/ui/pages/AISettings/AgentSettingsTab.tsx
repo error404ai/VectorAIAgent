@@ -8,6 +8,7 @@ function AgentSettingsTab() {
   // Local UI state only (no backend logic)
   // seconds to wait between dispatched actions
   const [waitBetweenActions, setWaitBetweenActions] = useState<number>(0.2);
+  const [enableAIRules, setEnableAIRules] = useState<boolean>(true);
   const [savedStatus, setSavedStatus] = useState<{
     status: "idle" | "saving" | "saved" | "error";
     message?: string;
@@ -24,18 +25,22 @@ function AgentSettingsTab() {
         ).electronAPI.getAgentSettings();
         if (agent && typeof agent.wait_between_actions === "number") {
           setWaitBetweenActions(agent.wait_between_actions);
+          setEnableAIRules(agent.enable_ai_rules ?? true);
           useAgentSettingsStore.getState().saveSettings({
             waitBetweenActions: agent.wait_between_actions,
+            enableAIRules: agent.enable_ai_rules ?? true,
           });
         } else {
           const store = useAgentSettingsStore.getState();
           setWaitBetweenActions(store.waitBetweenActions);
+          setEnableAIRules(store.enableAIRules);
         }
       } catch (_err) {
         // If IPC fails, fallback to local store
         console.warn("IPC getAgentSettings failed:", _err);
         const store = useAgentSettingsStore.getState();
         setWaitBetweenActions(store.waitBetweenActions);
+        setEnableAIRules(store.enableAIRules);
       }
       setHasUnsavedChanges(false);
     })();
@@ -44,11 +49,14 @@ function AgentSettingsTab() {
   const handleSave = () => {
     setSavedStatus({ status: "saving" });
     // persist to zustand store
-    useAgentSettingsStore.getState().saveSettings({ waitBetweenActions });
+    useAgentSettingsStore
+      .getState()
+      .saveSettings({ waitBetweenActions, enableAIRules });
     // persist to main process settings.json so Python and main can access it
     try {
       (window as unknown as Window).electronAPI.saveAgentSettings({
         wait_between_actions: waitBetweenActions,
+        enable_ai_rules: enableAIRules,
       });
     } catch (err) {
       console.warn("Failed to save agent settings to main process:", err);
@@ -66,6 +74,7 @@ function AgentSettingsTab() {
   const handleReset = () => {
     // Reset to default value
     setWaitBetweenActions(0.2);
+    setEnableAIRules(true);
     setHasUnsavedChanges(false);
     setSavedStatus({ status: "idle" });
   };
@@ -137,6 +146,30 @@ function AgentSettingsTab() {
                     />
                     <span className="text-xs text-white/50">
                       Current: {waitBetweenActions}s
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-3">
+                  <label className="block text-sm text-white/70">
+                    Enable AI Rules
+                  </label>
+                  <p className="mt-1 text-xs text-white/50">
+                    When enabled, AI searches for and applies relevant rules to
+                    prompts. When disabled, rules are not searched or applied.
+                  </p>
+                  <div className="mt-2 flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 rounded-none border border-white/20 bg-black/40 text-blue-500 focus:ring-0 focus:ring-offset-0 focus:outline-none"
+                      checked={enableAIRules}
+                      onChange={(e) => {
+                        setEnableAIRules(e.target.checked);
+                        setHasUnsavedChanges(true);
+                      }}
+                    />
+                    <span className="text-sm text-white/70">
+                      {enableAIRules ? "Enabled" : "Disabled"}
                     </span>
                   </div>
                 </div>

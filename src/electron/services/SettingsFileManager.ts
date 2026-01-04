@@ -240,13 +240,17 @@ export default class SettingsFileManager {
   }
 
   // Agent settings helpers
-  static getAgentSettings(): { wait_between_actions?: number } {
+  static getAgentSettings(): {
+    wait_between_actions?: number;
+    enable_ai_rules?: boolean;
+  } {
     const settings = this.loadSettings();
     return settings.agent || {};
   }
 
   static saveAgentSettings(agentSettings: {
     wait_between_actions?: number;
+    enable_ai_rules?: boolean;
   }): void {
     const settings = this.loadSettings();
     settings.agent = { ...settings.agent, ...agentSettings };

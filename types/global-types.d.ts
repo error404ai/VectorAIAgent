@@ -263,10 +263,10 @@ export type IpcChannelMap = {
   };
   getAgentSettings: {
     args: [];
-    return: { wait_between_actions?: number };
+    return: { wait_between_actions?: number; enable_ai_rules?: boolean };
   };
   saveAgentSettings: {
-    args: [{ wait_between_actions?: number }];
+    args: [{ wait_between_actions?: number; enable_ai_rules?: boolean }];
     return: { success: boolean; message?: string };
   };
   // Wallet management
