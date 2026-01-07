@@ -6,6 +6,7 @@ import AISettingsPage from "./pages/AISettingsPage";
 import Automation from "./pages/Automation";
 import BrowserSettingsPage from "./pages/BrowserSettingsPage";
 import Contact from "./pages/Contact";
+import EkoDemoPage from "./pages/EkoDemoPage";
 import Memory from "./pages/Memory";
 import MultiProfileAutomation from "./pages/MultiProfileAutomation";
 import MultiProfileAutomationScheduled from "./pages/MultiProfileAutomation/MultiProfileAutomationScheduled";
@@ -47,6 +48,10 @@ export const router = createMemoryRouter([
       {
         path: "wallet-management",
         element: <WalletManagement />,
+      },
+      {
+        path: "eko-demo",
+        element: <EkoDemoPage />,
       },
       {
         path: "ai-settings",

@@ -1,6 +1,7 @@
 import {
   Brain,
   Cpu,
+  FlaskConical,
   Mail,
   Monitor,
   Terminal,
@@ -34,6 +35,11 @@ function SideMenu() {
       name: "Wallets",
       path: "/wallet-management",
       icon: Wallet,
+    },
+    {
+      name: "Eko Demo",
+      path: "/eko-demo",
+      icon: FlaskConical,
     },
     {
       name: "AI Settings",

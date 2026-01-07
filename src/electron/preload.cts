@@ -92,6 +92,13 @@ const api = {
     ipcInvoke("setWalletProfile", walletId, profileId),
   updateWalletName: (walletId: string, name: string) =>
     ipcInvoke("updateWalletName", walletId, name),
+  // Eko automation IPC handlers
+  runEkoAutomation: (options: {
+    taskId: string;
+    prompt: string;
+    modelConfig?: ModelConfig;
+  }) => ipcInvoke("runEkoAutomation", options),
+  stopEkoAutomation: (taskId: string) => ipcInvoke("stopEkoAutomation", taskId),
 } satisfies IpcRendererAPI;
 
 contextBridge.exposeInMainWorld("electronAPI", {

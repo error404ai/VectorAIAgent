@@ -42,7 +42,7 @@ function createWindow() {
 }
 
 app.on("ready", async () => {
-  createWindow();
+  const mainWindow = createWindow();
 
-  registerIpcHandlers();
+  registerIpcHandlers(mainWindow);
 });

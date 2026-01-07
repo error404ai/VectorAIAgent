@@ -324,6 +324,30 @@ export type IpcChannelMap = {
     args: [walletId: string, name: string];
     return: { success: boolean; message?: string };
   };
+  // Eko automation
+  runEkoAutomation: {
+    args: [
+      {
+        taskId: string;
+        prompt: string;
+        modelConfig?: ModelConfig;
+      },
+    ];
+    return: {
+      success: boolean;
+      message: string;
+      result?: any;
+      error?: string;
+      logs?: string[];
+    };
+  };
+  stopEkoAutomation: {
+    args: [taskId: string];
+    return: {
+      success: boolean;
+      message: string;
+    };
+  };
 };
 
 export type IpcUnsubscribe = () => void;

@@ -1,3 +1,4 @@
+import type { BrowserWindow } from "electron";
 import { aiSettingsHandler } from "./ai/aiSettingsHandler.js";
 import { registerAutomationHandlers } from "./automation/index.js";
 import { registerBrowserHandlers } from "./browser/index.js";
@@ -5,12 +6,12 @@ import { registerWalletHandlers } from "./wallet/index.js";
 import { registerWindowHandlers } from "./window/index.js";
 
 export interface IpcHandlerRegistration {
-  (): void;
+  (mainWindow?: BrowserWindow | null): void;
 }
 
-export default function registerIpcHandlers() {
+export default function registerIpcHandlers(mainWindow?: BrowserWindow | null) {
   const handlers: IpcHandlerRegistration[] = [
-    registerAutomationHandlers,
+    (mw) => registerAutomationHandlers(mw),
     registerWindowHandlers,
     registerBrowserHandlers,
     registerWalletHandlers,
@@ -19,7 +20,7 @@ export default function registerIpcHandlers() {
 
   handlers.forEach((register) => {
     try {
-      register();
+      register(mainWindow);
     } catch (error) {
       console.error(`Error registering IPC handlers: ${error}`);
     }

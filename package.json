@@ -17,6 +17,8 @@
     "dist:linux": "npm run transpile:electron && npm run build && electron-builder --linux --x64"
   },
   "dependencies": {
+    "@eko-ai/eko": "^4.1.1",
+    "@eko-ai/eko-nodejs": "^4.1.1",
     "@libsql/client": "^0.15.8",
     "@reduxjs/toolkit": "^2.11.0",
     "@types/uuid": "^10.0.0",
@@ -27,6 +29,7 @@
     "drizzle-orm": "^0.44.2",
     "idb": "^8.0.3",
     "lucide-react": "^0.511.0",
+    "playwright": "^1.57.0",
     "react": "^19.1.0",
     "react-datepicker": "^4.17.0",
     "react-dom": "^19.1.0",
